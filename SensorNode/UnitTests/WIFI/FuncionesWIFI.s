@@ -1,11 +1,15 @@
-    .include "p30F4013.inc"
-    .global _comandoAT
+.include "p30F4013.inc"
 
-;**@brief: Esta funciÛn envia los comandos AT al mÛdulo WIFI.
-; *	   Se usa el UART1.
-; *@param: W0, tiene la direcciÛn de la cadena AT
-; *@return: Ninguno
-	
+.GLOBAL _comandoAT
+
+;***************************************************************
+; @brief: ESTA RUTINA SE ENCARGA DE EL ENV√çO DE UN COMANDO AT
+; HACIA EL M√ìDULO WI-FI. OBTIENE LA CADENA DEL COMANDO AT Y ES
+; ENVIADO CARACTER POR CARACTER A TRAV√âS DE UART1.
+; @param: DIRECCI√ìN DE MEMORIA DEL COMANDO AT ALMACENADO EN W0
+; @return: Ninguno
+;***************************************************************	
+
 _comandoAT:
     PUSH    W0
     PUSH    W1

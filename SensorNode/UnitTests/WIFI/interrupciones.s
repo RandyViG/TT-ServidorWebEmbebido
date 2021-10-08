@@ -1,10 +1,15 @@
-    .include "p30F4013.inc"
-    .global __U1RXInterrupt
+.include "p30F4013.inc"
 
-;**@brief: La interrupcion de recepcion del UART1 lee la respuesta del 
-; *	   m�dulo WIFI y la la envia a la PC usando el UART2 donde esta
-; *	   conectado el m�dulo FT232
-; *
+.GLOBAL __U1RXInterrupt
+
+
+;**************************************************************************
+; @brief: INTERRUPCIÓN ENCARGADA DE LEER LAS RESPUESTAS DEL MÓDULO WIFI
+; ENVIADAS A TRAVÉS DE UART1 Y RETORNARLAS HACIA EL MÓDULO FT232 A 
+; TRAVÉS DE UART2
+; @params: NINGUNO
+;  @RETURN: NINGUNO
+;**************************************************************************
 __U1RXInterrupt:
     PUSH    W0
     

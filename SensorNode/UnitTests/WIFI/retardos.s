@@ -1,8 +1,10 @@
-        .include "p30F4013.inc"
-	.GLOBAL	_RETARDO_5ms
-	.GLOBAL	_RETARDO_30ms
-	.GLOBAL	_RETARDO_1S
-	.GLOBAL	_RETARDO_15ms
+.include "p30F4013.inc"
+
+.GLOBAL	_RETARDO_5ms
+.GLOBAL	_RETARDO_30ms
+.GLOBAL	_RETARDO_1S
+.GLOBAL	_RETARDO_15ms
+
 ;******************************************************************************
 ;DESCRICION:	ESTA RUTINA GENERA UN RETARDO DE 30ms
 ;PARAMETROS: 	NINGUNO
