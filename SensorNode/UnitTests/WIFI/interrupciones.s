@@ -1,15 +1,12 @@
 .include "p30F4013.inc"
-
 .GLOBAL __U1RXInterrupt
 
-
-;**************************************************************************
-; @brief: INTERRUPCIÓN ENCARGADA DE LEER LAS RESPUESTAS DEL MÓDULO WIFI
-; ENVIADAS A TRAVÉS DE UART1 Y RETORNARLAS HACIA EL MÓDULO FT232 A 
-; TRAVÉS DE UART2
+;******************************************************************************    
+; @brief: ESTA RUTINA LEE LAS RESPUESTAS DEL MODULO WIFI ENVIADAS A TRAVES
+;         DE UART1 Y LAS ENVIA MEDIANTE UART2 HACIA EL MODULO FT232
 ; @params: NINGUNO
-;  @RETURN: NINGUNO
-;**************************************************************************
+; @return: NINGUNO
+;****************************************************************************** 
 __U1RXInterrupt:
     PUSH    W0
     
@@ -20,5 +17,7 @@ __U1RXInterrupt:
     
     POP	    W0
     RETFIE
+    
+    
     
     
