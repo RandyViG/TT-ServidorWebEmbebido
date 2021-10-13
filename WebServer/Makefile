@@ -3,7 +3,7 @@ OBJECTS:=$(patsubst %.c,%.o,$(wildcard *.c))
 DESTDIR=/usr/local/bin
 CFLAGS=-Wall
 OPTIONS=-DMG_ENABLE_DIRECTORY_LISTING=1
-LFLAGS=-lm
+LFLAGS=-lm -lpthread
 CC=gcc
 
 all: $(PROYECTO)
