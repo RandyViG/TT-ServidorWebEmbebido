@@ -1,41 +1,37 @@
-/********************************************************************************
- * @brief: ESTE PROGRAMA 
+/**@brief: Este programa muestra el uso del convertidor Anal?gico Digital (ADC)
+ * usando el sistema de interrupciones para realizar el monitoreo de una se?al
+ * de pulso cardiaco mediante la computadora.
  * @device: DSPIC30F4013
  * @oscillator: FRC, 7.3728MHz
- *******************************************************************************/
+ */
 #include "p30F4013.h"
-#include <stdio.h>
-#include <stdlib.h>
-
 /********************************************************************************/
-/* 						BITS DE CONFIGURACI�N									*/	
+/* 						BITS DE CONFIGURACI?N		*/	
 /********************************************************************************/
 /* SE DESACTIVA EL CLOCK SWITCHING Y EL FAIL-SAFE CLOCK MONITOR (FSCM) Y SE 	*/
-/* ACTIVA EL OSCILADOR INTERNO (FAST RC) PARA TRABAJAR							*/
+/* ACTIVA EL OSCILADOR INTERNO (FAST RC) PARA TRABAJAR				*/
 /* FSCM: PERMITE AL DISPOSITIVO CONTINUAR OPERANDO AUN CUANDO OCURRA UNA FALLA 	*/
-/* EN EL OSCILADOR. CUANDO OCURRE UNA FALLA EN EL OSCILADOR SE GENERA UNA 		*/
-/* TRAMPA Y SE CAMBIA EL RELOJ AL OSCILADOR FRC  								*/
+/* EN EL OSCILADOR. CUANDO OCURRE UNA FALLA EN EL OSCILADOR SE GENERA UNA 	*/
+/* TRAMPA Y SE CAMBIA EL RELOJ AL OSCILADOR FRC  				*/
 /********************************************************************************/
 //_FOSC(CSW_FSCM_OFF & FRC); 
 #pragma config FOSFPR = FRC             
 // Oscillator (Internal Fast RC (No change to Primary Osc Mode bits))
 #pragma config FCKSMEN = CSW_FSCM_OFF   
 // Clock Switching and Monitor (Sw Disabled, Mon Disabled)
-
 /********************************************************************************/
 /* SE DESACTIVA EL WATCHDOG														*/
 /********************************************************************************/
 //_FWDT(WDT_OFF); 
 #pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
-
 /********************************************************************************/
-/* SE ACTIVA EL POWER ON RESET (POR), BROWN OUT RESET (BOR), 					*/	
-/* POWER UP TIMER (PWRT) Y EL MASTER CLEAR (MCLR)								*/
+/* SE ACTIVA EL POWER ON RESET (POR), BROWN OUT RESET (BOR), 			*/	
+/* POWER UP TIMER (PWRT) Y EL MASTER CLEAR (MCLR)				*/
 /* POR: AL MOMENTO DE ALIMENTAR EL DSPIC OCURRE UN RESET CUANDO EL VOLTAJE DE 	*/	
-/* ALIMENTACI?N ALCANZA UN VOLTAJE DE UMBRAL (VPOR), EL CUAL ES 1.85V			*/
-/* BOR: ESTE MODULO GENERA UN RESET CUANDO EL VOLTAJE DE ALIMENTACI?N DECAE		*/
-/* POR DEBAJO DE UN CIERTO UMBRAL ESTABLECIDO (2.7V) 							*/
-/* PWRT: MANTIENE AL DSPIC EN RESET POR UN CIERTO TIEMPO ESTABLECIDO, ESTO 		*/
+/* ALIMENTACI?N ALCANZA UN VOLTAJE DE UMBRAL (VPOR), EL CUAL ES 1.85V		*/
+/* BOR: ESTE MODULO GENERA UN RESET CUANDO EL VOLTAJE DE ALIMENTACI?N DECAE	*/
+/* POR DEBAJO DE UN CIERTO UMBRAL ESTABLECIDO (2.7V) 				*/
+/* PWRT: MANTIENE AL DSPIC EN RESET POR UN CIERTO TIEMPO ESTABLECIDO, ESTO 	*/
 /* AYUDA A ASEGURAR QUE EL VOLTAJE DE ALIMENTACI?N SE HA ESTABILIZADO (16ms) 	*/
 /********************************************************************************/
 //_FBORPOR( PBOR_ON & BORV27 & PWRT_16 & MCLR_EN ); 
@@ -44,236 +40,139 @@
 #pragma config BODENV = BORV20           // Brown Out Voltage (2.7V)
 #pragma config BOREN  = PBOR_ON          // PBOR Enable (Enabled)
 #pragma config MCLRE  = MCLR_EN          // Master Clear Enable (Enabled)
-
 /********************************************************************************/
-/*SE DESACTIVA EL C?DIGO DE PROTECCI?N											*/
+/*SE DESACTIVA EL C?DIGO DE PROTECCI?N						*/
 /********************************************************************************/
 //_FGS(CODE_PROT_OFF);      
 // FGS
-#pragma config GWRP = GWRP_OFF     //General Code Segment Write Protect (Disabled)
-#pragma config GCP = CODE_PROT_OFF //General Segment Code Protection (Disabled)
+#pragma config GWRP = GWRP_OFF          // General Code Segment Write Protect (Disabled)
+#pragma config GCP = CODE_PROT_OFF      // General Segment Code Protection (Disabled)
 
 /********************************************************************************/
-/* SECCI�N DE DECLARACI�N DE CONSTANTES CON DEFINE								*/
+/* SECCI?N DE DECLARACI?N DE CONSTANTES CON DEFINE				*/
 /********************************************************************************/
-#define MUESTRAS 64
 #define EVER 1
-#define NANCK 1
-#define ACK 0
+#define MUESTRAS 64
 
 /********************************************************************************/
 /* DECLARACIONES GLOBALES														*/
 /********************************************************************************/
-/*DECLARACI?N DE LA ISR DEL TIMER 1 USANDO __attribute__						*/
+/*DECLARACI?N DE LA ISR DEL TIMER 1 USANDO __attribute__			*/
 /********************************************************************************/
 void __attribute__((__interrupt__)) _T1Interrupt( void );
 
 /********************************************************************************/
-/* CONSTANTES ALMACENADAS EN EL ESPACIO DE LA MEMORIA DE PROGRAMA				*/
+/* CONSTANTES ALMACENADAS EN EL ESPACIO DE LA MEMORIA DE PROGRAMA		*/
 /********************************************************************************/
 int ps_coeff __attribute__ ((aligned (2), space(prog)));
-
 /********************************************************************************/
-/* VARIABLES NO INICIALIZADAS EN EL ESPACIO X DE LA MEMORIA DE DATOS			*/
+/* VARIABLES NO INICIALIZADAS EN EL ESPACIO X DE LA MEMORIA DE DATOS		*/
 /********************************************************************************/
 int x_input[MUESTRAS] __attribute__ ((space(xmemory)));
-
 /********************************************************************************/
-/* VARIABLES NO INICIALIZADAS EN EL ESPACIO Y DE LA MEMORIA DE DATOS			*/
+/* VARIABLES NO INICIALIZADAS EN EL ESPACIO Y DE LA MEMORIA DE DATOS		*/
 /********************************************************************************/
 int y_input[MUESTRAS] __attribute__ ((space(ymemory)));
-
 /********************************************************************************/
 /* VARIABLES NO INICIALIZADAS LA MEMORIA DE DATOS CERCANA (NEAR), LOCALIZADA	*/
-/* EN LOS PRIMEROS 8KB DE RAM													*/
+/* EN LOS PRIMEROS 8KB DE RAM							*/
 /********************************************************************************/
 int var1 __attribute__ ((near));
 
-/********************************************************************************
- * DECLARACI�N DE FUNCIONES
- ********************************************************************************/
-/*FUNCIONES PARA CONFIGURACI�N*/
-void iniciar_perifericos( void );
-void iniciar_modulo_uart2( void );
-void iniciar_modulo_I2C( void );
-
-/*FUNCIONES PARA SENSOR SHT*/
-void reiniciar_SHT(void);
-unsigned char configurar_sensor(void);
-unsigned char realizar_lectura(void);
-
-/*FUNCIONES PARA I2C*/
-void iniciar_I2C( void );
-void detener_I2C(void);
-void enviar_dato_I2C( unsigned char dato );
-unsigned char recibe_dato_I2C(void);
-void ack_I2C(void);
-void nack_I2C(void);
-
-/*FUNCIONES DE RETARDOS*/
-void retardo_100ms(void);
-void retardo_15ms(void);
-void retardo_20ms(void);
-void retardo_1S(void);
-
-void envia_dato_PC( unsigned int cmd );
+void iniPerifericos( void );
+void iniTimer3( void );
+void iniADC( void );
+void iniUART1( void );
+void iniInterrupciones( void );
 
 int main( void ){
-    unsigned char estado;
-
-    iniciar_perifericos();
-    
-    iniciar_modulo_uart2();
-    iniciar_modulo_I2C();
-    
-    /*SE HABILITA EL UART2*/
-    U2MODEbits.UARTEN = 1;
-    /*SE HABILITA LA TRANSMISI�N*/
-    U2STAbits.UTXEN = 1;
-    
-    reiniciar_SHT();
-    
-    retardo_100ms();
+    iniPerifericos();
+    iniUART1();
+    iniADC();
+    iniTimer3();
+    iniInterrupciones();
+    T3CONbits.TON = 1;     //Encendiendo TIMER3
+    ADCON1bits.ADON = 1;   //Encendiendo ADC
+    U2MODEbits.UARTEN = 1; //Encendiendo UART
+    U2STAbits.UTXEN = 1;   //Habilitando transmisi?n
     
     for( ; EVER ; ){
-        estado = configurar_sensor();
-        if( estado )
-            continue;
-        estado = realizar_lectura();
-        if( estado )
-            continue;
-        retardo_1S();
-        retardo_1S();     
+        asm("PWRSAV #1");  //Modo IDLE
     }
+    
     return 0;
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCI�N INICIALIZA LOS PERIFERICOS DEL MICROCONTROLADOR     */
-/*         NECESARIOS PARA LA COMUNICACI�N CON EL SENSOR MEDIANTE 12C.       */
-/*         LIMPIA EL PUERTO F, LO ESTABLE COMO SALIDA (OUTPUT), CONFIGURA   */
-/*         UART2 PONE EL PIN RF4 (UT2RX) COMO INPUT Y EL PIN RF5 (U2TX)     */
-/*         COMO OUTPUT                                                       */
-/* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* DESCRICION:	ESTA RUTINA INICIALIZA LAS INTERRUPCIONES		    */
+/* PARAMETROS: NINGUNO                                                      */
+/* RETORNO: NINGUNO						    	    */
 /****************************************************************************/
-void iniciar_perifericos( void ){
+void iniInterrupciones( void ){
+    IFS0bits.ADIF = 0;
+    IFS0bits.T3IF = 0;
+    IEC0bits.ADIE = 1;
+    IEC0bits.T3IE = 1;
+}
+
+/****************************************************************************/
+/* DESCRICION:	ESTA RUTINA INICIALIZA LOS PERIFERICOS			    */
+/* PARAMETROS: NINGUNO                                                      */
+/* RETORNO: NINGUNO							    */
+/****************************************************************************/
+void iniPerifericos( void ){
+    PORTB = 0;
+    asm("nop");
+    LATB = 0;
+    asm("nop");
+    TRISB = 0;
+    asm("nop");
+    TRISBbits.TRISB2 = 1;
+    asm("nop");
     PORTF = 0;
     asm("nop");
     LATF = 0;
     asm("nop");
     TRISF = 0;
     asm("nop");
-        
-    PORTFbits.RF5 = 0;
-    PORTFbits.RF4 = 1;
+    TRISFbits.TRISF5 = 0;
+    asm("nop");
+    TRISFbits.TRISF4 = 1;
     asm("nop");
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCI�N INICIALIZA UART2 CON UN BAUDAGE DE 9600             */
-/* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* DESCRICION: ESTA RUTINA INICIALIZA EL UART1 CON 19200B     		    */
+/* PARAMETROS: NINGUNO                                                      */
+/* RETORNO: NINGUNO							    */
 /****************************************************************************/
-void iniciar_modulo_uart2( void ){
+void iniUART1( void ){
     U2MODE = 0x0020;
     U2STA = 0x8000;
-    U2BRG = 11;
+    U2BRG = 11;      // 19200 B
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCI�N INICIALIZA I2C EN MODO FAST MODE 400KHz             */
-/* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* DESCRICION: ESTA RUTINA INICIALIZA EL TIMER3 CON 8192HZ     		    */
+/* PARAMETROS: NINGUNO                                                      */
+/* RETORNO: NINGUNO							    */
 /****************************************************************************/
-void iniciar_modulo_I2C( void ){
-    I2CCON = 0X8000;
-    I2CBRG = 2;
+void iniTimer3( void ){
+    TMR3 = 0x0000;
+    T3CON = 0x0000; // K PEX CON EL TIMER EXTERNO
+    PR3 = 225;
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCI�N MANDA LA SECUENCIA DE COMANDOS PARA CONFIGURAR EL   */ 
-/*         SENSOR SHT3X-DIS EN MODO SINGLE SHOT PARA ESTO SE DEBE MANDAR    */
-/*         LA DIRECCI�N DEL ESCLAVO JUNTO CON EL BIT DE ESCRITURA Y EL      */
-/*         COMANDO DE CONFIGURACI�N.                                        */
-/*           DIRECCI�N: 0X44-(0100 0100)                                    */
-/*           BIT: 0-ESCRITURA | 1-LECTURA                                   */
-/*           COMANDO: 0X2C0D                                                */
-/*             0X2C-CLOCK STRETCHING ENABLED                                */
-/*             0X0D-REPEATIBILITY MEDIUM                                    */  
-/* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* DESCRICION: ESTA RUTINA INICIALIZA EL ADC                 		    */
+/* PARAMETROS: NINGUNO                                                      */
+/* RETORNO: NINGUNO							    */
 /****************************************************************************/
-unsigned char configurar_sensor( void ){
-    iniciar_I2C();
-    
-    //0X88 (100 0100 0)- ES LA DIRECCI�N DEL SENSOR JUNTO EL BIT DE ESCRITURA
-    enviar_dato_I2C(0X88);
-    if( I2CSTATbits.ACKSTAT == 1 ) //ACK del sensor
-        return NANCK;
-    enviar_dato_I2C(0X2C);
-    if( I2CSTATbits.ACKSTAT == 1 ) //ACK del sensor
-        return NANCK;                        
-    enviar_dato_I2C(0X0D);
-    if( I2CSTATbits.ACKSTAT == 1 ) //ACK del sensor
-        return NANCK;
-    detener_I2C();
-    
-    return ACK;
-}
-
-/****************************************************************************/
-/* @brief: ESTA FUNCI�N MANDA EL COMANDO DE I2C AL SENSOR PARA OBTENER LOS  */
-/*         DATOS SENSADOS DE TEMPERATURA Y HUMEDAD. DESPUES LOS MANDA A UNA */
-/*         COMPUTADORA MEDIANTE UART2                                       */
-/* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
-/****************************************************************************/
-unsigned char realizar_lectura(void){
-    unsigned int dato1, dato2, dato3, dato4;
-    
-    iniciar_I2C();
-    //0X889 (100 0100 1)- ES LA DIRECCI�N DEL SENSOR JUNTO EL BIT DE LECTURA
-    enviar_dato_I2C(0X89);
-    if( I2CSTATbits.ACKSTAT == 1 ) //ACK del sensor
-        return NANCK;                        
-
-    dato1 =  recibe_dato_I2C();
-    ack_I2C();
-    dato2 = recibe_dato_I2C();
-    ack_I2C();
-    dato3 = recibe_dato_I2C();
-    ack_I2C();
-    dato3 = recibe_dato_I2C();
-    ack_I2C();
-    dato4 = recibe_dato_I2C();
-    nack_I2C();
-    detener_I2C();
-    
-    //ENVIA MSB Temperatura (PARTE ALTA)
-    envia_dato_PC(dato1);
-    retardo_100ms();
-    //ENVIA LSB Temperatura (PARTE BAJA)
-    envia_dato_PC(dato2);
-    retardo_100ms();
-    //ENVIA MSB Humedad (PARTE ALTA)
-    envia_dato_PC(dato3);
-    retardo_100ms();
-    //ENVIA LSB Humedad (PARTE BAJA)
-    envia_dato_PC(dato4);
-    retardo_100ms();
-    
-   return ACK;
-}
-
-/****************************************************************************/
-/* @brief: ESTA FUNCI�N MANDA UN BYTE A LA COMPUTADORA MEDIANTE UART        */
-/* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
-/****************************************************************************/
-void envia_dato_PC( unsigned int cmd ){
-    IFS1bits.U2TXIF = 0;
-    U2TXREG = cmd;
-        while( !IFS1bits.U2TXIF );
-    asm("nop");
+void iniADC( void ){
+    ADCON1 = 0x0044;
+    ADCON2 = 0x003C;
+    ADCON3 = 0x0F02; //  TcY * 3/2 PENDIENTE
+    ADCHS  = 0x0002; //AN2
+    ADPCFG = 0xFFFB;
+    ADCSSL = 0x0000;
 }
