@@ -19,30 +19,40 @@ int fin;
 /*Directorio raiz donde se alojaran las vistas renderizadas por el servidor*/
 const char *dir_raiz = "./public";
 
-void servidor_tcp(void *args);
+struct args_thread{
+    struct mg_mgr *mgr;
+};
+
+void *servidor_tcp(void *args);
 
 int main( int argc, char *argv[] ){
-    struct mg_mgr mgr;
+    struct mg_mgr mgr_http,mgr_tcp;
+    struct args_thread *args_tcp;
     struct mg_connection *c;
     pthread_t tid_servidor_tcp;
 
-    pthread_create(&tid_servidor_tcp,NULL,servidor_tcp,NULL);
-    signal( SIGINT, manejador_sen );
-    mg_mgr_init( &mgr );
+    args_tcp = malloc(sizeof(struct args_thread));
+    args_tcp->mgr = &mgr_tcp;
 
-    if( ( c = mg_http_listen( &mgr, s_direccion_escucha, manejador_servidor, &mgr) ) == NULL ){
+    signal( SIGINT, manejador_sen );
+    mg_mgr_init( &mgr_http );
+    pthread_create(&tid_servidor_tcp,NULL,servidor_tcp,args_tcp);
+
+    if( ( c = mg_http_listen( &mgr_http, s_direccion_escucha, manejador_servidor, &mgr_http) ) == NULL ){
         fprintf( stderr, "Error, no se puede escuchar en la dirección %s", s_direccion_escucha );
         exit( EXIT_FAILURE );
     }
     
     fin = 1;
     while( fin )
-        mg_mgr_poll( &mgr, 1000 );
+        mg_mgr_poll( &mgr_http, 1000 );
     
-    mg_mgr_free( &mgr );
+    LOG(LL_INFO,("TERMINANDO SERVIDOR HTTP"));
+    pthread_kill(tid_servidor_tcp, SIGINT);
 
-    pthread_join(tid_servidor_tcp,NULL);
-
+    mg_mgr_free( &mgr_http );
+    mg_mgr_free( &mgr_tcp );
+    free(args_tcp);
     return 0;
 }
 
@@ -52,14 +62,18 @@ int main( int argc, char *argv[] ){
 * @param: NINGUNO                                                      
 * @return: NINGUNO														
 ******************************************************************/
-void servidor_tcp(void *args){
-    struct mg_mgr mgr;
+void *servidor_tcp(void *args){
+    struct mg_mgr *mgr;
+    mgr = ((struct args_thread *)args)->mgr;
+
+    mg_mgr_init( mgr );
     
     LOG(LL_INFO, ("Iniciando Servidor TCP"));
                                
-    mg_listen(&mgr, "tcp://127.0.0.1:1234", manejador_tcp, &mgr);
-    for (;;) mg_mgr_poll(&mgr, 1000);
+    mg_listen(mgr, "tcp://127.0.0.1:1234", manejador_tcp, mgr);
+    for (;;) mg_mgr_poll(mgr, 1000);
+    
+    LOG(LL_INFO,("TERMINANDO SERVIDOR TCP"));
 
-    mg_mgr_free(&mgr);   
     pthread_exit(NULL);
 }
