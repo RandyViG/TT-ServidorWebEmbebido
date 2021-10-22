@@ -41,7 +41,7 @@
 #pragma config BOREN  = PBOR_ON          // PBOR Enable (Enabled)
 #pragma config MCLRE  = MCLR_EN          // Master Clear Enable (Enabled)
 /********************************************************************************/
-/*SE DESACTIVA EL C?DIGO DE PROTECCI?N						*/
+/*SE DESACTIVA EL C?DIGO DE PROTECCI?N						                    */
 /********************************************************************************/
 //_FGS(CODE_PROT_OFF);      
 // FGS
@@ -49,7 +49,7 @@
 #pragma config GCP = CODE_PROT_OFF      // General Segment Code Protection (Disabled)
 
 /********************************************************************************/
-/* SECCI?N DE DECLARACI?N DE CONSTANTES CON DEFINE				*/
+/* SECCI?N DE DECLARACI?N DE CONSTANTES CON DEFINE				                */
 /********************************************************************************/
 #define EVER 1
 #define MUESTRAS 64
@@ -57,44 +57,44 @@
 /********************************************************************************/
 /* DECLARACIONES GLOBALES														*/
 /********************************************************************************/
-/*DECLARACI?N DE LA ISR DEL TIMER 1 USANDO __attribute__			*/
+/*DECLARACI?N DE LA ISR DEL TIMER 1 USANDO __attribute__			            */
 /********************************************************************************/
 void __attribute__((__interrupt__)) _T1Interrupt( void );
 
 /********************************************************************************/
-/* CONSTANTES ALMACENADAS EN EL ESPACIO DE LA MEMORIA DE PROGRAMA		*/
+/* CONSTANTES ALMACENADAS EN EL ESPACIO DE LA MEMORIA DE PROGRAMA		        */
 /********************************************************************************/
 int ps_coeff __attribute__ ((aligned (2), space(prog)));
 /********************************************************************************/
-/* VARIABLES NO INICIALIZADAS EN EL ESPACIO X DE LA MEMORIA DE DATOS		*/
+/* VARIABLES NO INICIALIZADAS EN EL ESPACIO X DE LA MEMORIA DE DATOS		    */
 /********************************************************************************/
 int x_input[MUESTRAS] __attribute__ ((space(xmemory)));
 /********************************************************************************/
-/* VARIABLES NO INICIALIZADAS EN EL ESPACIO Y DE LA MEMORIA DE DATOS		*/
+/* VARIABLES NO INICIALIZADAS EN EL ESPACIO Y DE LA MEMORIA DE DATOS		    */
 /********************************************************************************/
 int y_input[MUESTRAS] __attribute__ ((space(ymemory)));
 /********************************************************************************/
 /* VARIABLES NO INICIALIZADAS LA MEMORIA DE DATOS CERCANA (NEAR), LOCALIZADA	*/
-/* EN LOS PRIMEROS 8KB DE RAM							*/
+/* EN LOS PRIMEROS 8KB DE RAM							                        */
 /********************************************************************************/
 int var1 __attribute__ ((near));
 
 void iniPerifericos( void );
 void iniTimer3( void );
 void iniADC( void );
-void iniUART1( void );
+void iniUART2( void );
 void iniInterrupciones( void );
 
 int main( void ){
     iniPerifericos();
-    iniUART1();
+    iniUART2();
     iniADC();
     iniTimer3();
     iniInterrupciones();
     T3CONbits.TON = 1;     //Encendiendo TIMER3
     ADCON1bits.ADON = 1;   //Encendiendo ADC
     U2MODEbits.UARTEN = 1; //Encendiendo UART
-    U2STAbits.UTXEN = 1;   //Habilitando transmisi?n
+    U2STAbits.UTXEN = 1;   //Habilitando transmision
     
     for( ; EVER ; ){
         asm("PWRSAV #1");  //Modo IDLE
@@ -104,9 +104,9 @@ int main( void ){
 }
 
 /****************************************************************************/
-/* DESCRICION:	ESTA RUTINA INICIALIZA LAS INTERRUPCIONES		    */
+/* DESCRICION:	ESTA RUTINA INICIALIZA LAS INTERRUPCIONES		            */
 /* PARAMETROS: NINGUNO                                                      */
-/* RETORNO: NINGUNO						    	    */
+/* RETORNO: NINGUNO						    	                            */
 /****************************************************************************/
 void iniInterrupciones( void ){
     IFS0bits.ADIF = 0;
@@ -116,9 +116,9 @@ void iniInterrupciones( void ){
 }
 
 /****************************************************************************/
-/* DESCRICION:	ESTA RUTINA INICIALIZA LOS PERIFERICOS			    */
+/* DESCRICION:	ESTA RUTINA INICIALIZA LOS PERIFERICOS			            */
 /* PARAMETROS: NINGUNO                                                      */
-/* RETORNO: NINGUNO							    */
+/* RETORNO: NINGUNO							                                */
 /****************************************************************************/
 void iniPerifericos( void ){
     PORTB = 0;
@@ -139,34 +139,43 @@ void iniPerifericos( void ){
     asm("nop");
     TRISFbits.TRISF4 = 1;
     asm("nop");
+    
+    PORTD = 0;
+    asm("nop");
+    LATD = 0;
+    asm("nop");
+    TRISD = 0;
+    asm("nop");
 }
 
 /****************************************************************************/
-/* DESCRICION: ESTA RUTINA INICIALIZA EL UART1 CON 19200B     		    */
+/* DESCRICION: ESTA RUTINA INICIALIZA EL UART1 CON 19200B     		        */
 /* PARAMETROS: NINGUNO                                                      */
-/* RETORNO: NINGUNO							    */
+/* RETORNO: NINGUNO							                                */
 /****************************************************************************/
-void iniUART1( void ){
+void iniUART2( void ){
     U2MODE = 0x0020;
     U2STA = 0x8000;
     U2BRG = 11;      // 19200 B
 }
 
 /****************************************************************************/
-/* DESCRICION: ESTA RUTINA INICIALIZA EL TIMER3 CON 8192HZ     		    */
+/* DESCRICION: ESTA RUTINA INICIALIZA EL TIMER3 CON 1.5HZ     		        */
 /* PARAMETROS: NINGUNO                                                      */
-/* RETORNO: NINGUNO							    */
+/* RETORNO: NINGUNO							                                */
 /****************************************************************************/
 void iniTimer3( void ){
     TMR3 = 0x0000;
-    T3CON = 0x0000; // K PEX CON EL TIMER EXTERNO
-    PR3 = 225;
+    //T3CON = 0x0020; 
+    PR3 = 19200;
+    T3CON = 0x0000; 
+    //PR3 = 225;
 }
 
 /****************************************************************************/
-/* DESCRICION: ESTA RUTINA INICIALIZA EL ADC                 		    */
+/* DESCRICION: ESTA RUTINA INICIALIZA EL ADC                 		        */
 /* PARAMETROS: NINGUNO                                                      */
-/* RETORNO: NINGUNO							    */
+/* RETORNO: NINGUNO							                                */
 /****************************************************************************/
 void iniADC( void ){
     ADCON1 = 0x0044;
