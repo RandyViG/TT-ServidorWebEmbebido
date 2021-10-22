@@ -10,3 +10,11 @@ struct datos_recibidos{
     float medicion_hum;
     int bandera_alerta;
 };
+
+struct datos_usuario
+{
+    char *nombre;
+    char *password;
+    char *email;
+    int nodo;
+};

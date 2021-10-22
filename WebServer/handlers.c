@@ -39,6 +39,9 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
         }
 
         /*Definición de rutas*/
+        else if(mg_http_match_uri( hm, "/" )){
+            mg_http_serve_file( c, hm, "./public/login.html",&opts);
+        }
         else if( mg_http_match_uri( hm, "/login" ) )
             mg_http_serve_file( c, hm, "./public/login.html",&opts);
 
@@ -60,8 +63,6 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
         }
             
     }
-
-    return (void)*datos_fn;
 }
 
 /******************************************************************
@@ -75,10 +76,9 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
 void manejador_tcp(struct mg_connection *c, int ev, void *datos_ev, void *datos_fn) {
     if (ev == MG_EV_READ) {
         struct datos_recibidos dr;
-        LOG(LL_INFO, ("Algo ha sido recibido: %s",c->recv.buf));
+        LOG(LL_INFO, ("Algo ha sido recibido"));
 
-        procesar_cadena((char*)(c->recv.buf),&dr);
-        escribir_medidas(0,dr);
+        procesar_cadena((unsigned char*)(c->recv.buf),&dr);
 
         mg_printf(c, "Correcto!");
         mg_iobuf_del(&c->recv, 0, c->recv.len);   // And discard it
