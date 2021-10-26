@@ -30,9 +30,9 @@ int main( void ){
 		v = 0;
 		read( fd_serie, &dato[0], 1 );
 		read( fd_serie, &dato[1], 1 );
-		bin = dato[0];
-		bin = bin<<8 | dato[1];
-		v = ((float)bin) / (4096.0 * 5.0);
+		bin = dato[1];
+		bin = bin<<8 | dato[0];
+		v = ( (float)bin ) * ( 3.3 / 4096.0 );
 		printf("dato:%d, voltaje:%f\n", bin,v);
 	}
 	close( fd_serie );
