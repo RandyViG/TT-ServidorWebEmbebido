@@ -138,12 +138,12 @@ unsigned char cmdCIPCLOSE[] = "AT+CIPCLOSE\r\n";
 unsigned char cmdSTOPPT[] = "+++";
 
 /*VARIABLES DE SENSORES*/
-short int temperatura, idNodo;
-char idTemperatura;
+unsigned short int temperatura, idNodo;
+unsigned char idTemperatura;
 
 int main (void){
     idNodo = 0;
-    idTemperatura = 0;
+    idTemperatura = 1;
     temperatura = 255;
     
     iniciar_puertos();
