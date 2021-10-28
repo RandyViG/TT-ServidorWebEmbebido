@@ -51,10 +51,19 @@ int main(int argc, char **argv){
 			perror ("Ocurrio algun problema al recibir datos del cliente");
 			exit(1);
 		}
-		
-		memcpy( &idNodo, trama, 2 );
-		memcpy( &idSensor, trama+2, 1 );
-		memcpy( &dato, trama+3, 2 );
+		idNodo = trama[0];
+		idNodo = idNodo << 8 | trama[1];
+
+		idSensor = trama[2];
+
+		dato = trama[3];
+		dato = dato << 8 | trama[4]; 
+		/*int i;
+		for (i=0;i<5;i++)
+			printf("%u ",trama[i]);
+		printf("\n");*/
+
+		printf("Nodo: %u\nSensor: %u\nDato: %u\n",idNodo,idSensor,dato);
 	}
 	
 
