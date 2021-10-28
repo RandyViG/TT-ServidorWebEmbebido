@@ -31,7 +31,7 @@
 /* TRAMPA Y SE CAMBIA EL RELOJ AL OSCILADOR FRC  								*/
 /********************************************************************************/
 //_FOSC(CSW_FSCM_OFF & FRC); 
-#pragma config FOSFPR = HS //FRC             
+#pragma config FOSFPR = FRC//HS             
 // Oscillator (Internal Fast RC (No change to Primary Osc Mode bits))
 #pragma config FCKSMEN = CSW_FSCM_OFF   
 // Clock Switching and Monitor (Sw Disabled, Mon Disabled)
@@ -108,10 +108,10 @@ void configurar_wifi( void );
 void iniciar_interrupciones( void );
 void habilitar_uart( void );
 
-/*FUNCIONES PARA MODULO ESP8266*/
+/*FUNCIONES PARA MODULO WIFI - ESP8266*/
 void iniciar_wifi( void );
 void comandoAT(unsigned char *);
-void enviar_wifi( void );
+void enviar_wifi(void);
 void cerrar_conexion( void );
 
 /*FUNCIONES DE RETARDOS*/
@@ -128,15 +128,24 @@ unsigned char cmdRST[] = "AT+RST\r\n";
 unsigned char cmdCWMODE[] = "AT+CWMODE=1\r\n";
 unsigned char cmdCIPMUX[] = "AT+CIPMUX=0\r\n";
 //unsigned char cmdCWJAP[] = "AT+CWJAP=\"ssid\",\"password\"\r\n";
-unsigned char cmdCWJAP[] = "AT+CWJAP=\"IZZI-6743\",\"50A5DC686743\"\r\n";
+//unsigned char cmdCWJAP[] = "AT+CWJAP=\"IZZI-6743\",\"50A5DC686743\"\r\n";
+unsigned char cmdCWJAP[] = "AT+CWJAP=\"IZZI-6893\",\"2WC468400355\"\r\n";
 unsigned char cmdCIFSR[] = "AT+CIFSR\r\n";
-unsigned char cmdCIPSTART[] = "AT+CIPSTART=\"TCP\",\"192.168.0.2\",6000\r\n";
+unsigned char cmdCIPSTART[] = "AT+CIPSTART=\"TCP\",\"192.168.0.31\",6000\r\n";
 unsigned char cmdCIPMODE[] = "AT+CIPMODE=1\r\n";
 unsigned char cmdCIPSEND[] = "AT+CIPSEND\r\n";
 unsigned char cmdCIPCLOSE[] = "AT+CIPCLOSE\r\n";
 unsigned char cmdSTOPPT[] = "+++";
 
+/*VARIABLES DE SENSORES*/
+unsigned short int temperatura, idNodo;
+unsigned char idTemperatura;
+
 int main (void){
+    idNodo = 0;
+    idTemperatura = 1;
+    temperatura = 255;
+    
     iniciar_puertos();
     iniciar_uart();
    
@@ -148,7 +157,14 @@ int main (void){
         
     for( ; EVER ; ){
         enviar_wifi();
-    
+        U1TXREG = (idNodo & 0xFF00)>>8;
+        U1TXREG = idNodo & 0x00FF;
+        U1TXREG = idTemperatura;
+        U1TXREG = (temperatura & 0xFF00)>>8;
+        U1TXREG = temperatura & 0x00FF;
+        
+        retardo_1S();
+        
         cerrar_conexion();
         asm("nop");   
     }
@@ -216,11 +232,13 @@ void iniciar_puertos( void ){
 void iniciar_uart( void ){
     U1MODE = 0x0000;
     U1STA  = 0x8000;         
-    U1BRG  = 1;
+    //U1BRG  = 1;
+    U1BRG  = 0;
    
     U2MODE = 0x0000;
     U2STA  = 0x8000;   
-    U2BRG  = 1;   
+    //U2BRG  = 1;
+    U1BRG  = 0;
 }
 
 /****************************************************************************/
@@ -235,7 +253,7 @@ void iniciar_interrupciones( void ){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN HABILITA LOS UARTS                                  */
+/* @brief: ESTA FUNCIÓN HABILITA UART1 Y UART2                              */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
 /****************************************************************************/
@@ -276,8 +294,7 @@ void iniciar_wifi( void ){
 
 /****************************************************************************/
 /* @brief: ESTA FUNCION CONFIGURA EL MODULO ESP2866 COMO CLIENTE TCP Y      */
-/*         HABILITA EL MODO "passthrough" PARA EL ENVIO DE DATOS MEDIANTE   */
-/*         UART1                                                            */
+/*         PARA EL ENVIO DE DATOS MEDIANTE UART1                            */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
 /****************************************************************************/
@@ -305,23 +322,18 @@ void configurar_wifi( void ){
     retardo_1S();
     retardo_1S();
     retardo_1S();
-    retardo_1S();   
-   //comandoAT(cmdCIFSR);
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();     
+    retardo_1S();       
     
 }
 
+
 /****************************************************************************/
-/* @brief: ESTA FUNCION ENVIA LOS DATOS QUE ESTAN EN EL FIFO DE UART1       */
-/*         Y DETIENE EL ENVIO MEDIANTE LA CADENA '+++'.*/
+/* @brief: ESTA FUNCION ESTABLECE EL INICIO DE ENVIO DE DATOS               */
+/*         MEDIANTE EL MODO "PASSTHROUGH" DEL MODULO ESP2866                */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
 /****************************************************************************/
-void enviar_wifi( void ){
+void enviar_wifi(void){
     comandoAT(cmdCIPSTART);
     retardo_1S();
     retardo_1S();
@@ -329,7 +341,7 @@ void enviar_wifi( void ){
     retardo_1S();
     retardo_1S();
     
-    comandoAT(cmdCIPMODE);// SE CONFIGURA MODO "passthrough"
+    comandoAT(cmdCIPMODE); // SE CONFIGURA MODO "passthrough"
     retardo_1S();
     retardo_1S();
     retardo_1S();
@@ -343,23 +355,7 @@ void enviar_wifi( void ){
     retardo_1S();
     retardo_1S();
     retardo_1S();
-    
-    U1TXREG = 'H';
-    U1TXREG = '0';
-    U1TXREG = 'L';
-    U1TXREG = 'A';
-    
-    retardo_1S();
-    retardo_1S();
-    
-    comandoAT(cmdSTOPPT);
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();
 }
-
 
 /****************************************************************************/
 /* @brief: ESTA FUNCION CIERRA LA CONEXION TCP CON EL SERVIDOR.             */
@@ -367,6 +363,12 @@ void enviar_wifi( void ){
 /* @return: NINGUNO															*/
 /****************************************************************************/
 void cerrar_conexion( void ){
+    comandoAT(cmdSTOPPT);
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
     comandoAT(cmdCIPCLOSE);
     retardo_1S();
     retardo_1S();
