@@ -8,7 +8,7 @@ extern "C" {
 void iniciar_uart( void );
 void iniciar_wifi( void );
 void configurar_wifi( void );
-void enviar_wifi( void );
+void enviar_wifi(void);
 void cerrar_conexion( void );
 
 #ifdef	__cplusplus
