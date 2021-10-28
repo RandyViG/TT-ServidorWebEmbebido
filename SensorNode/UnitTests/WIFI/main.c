@@ -31,7 +31,7 @@
 /* TRAMPA Y SE CAMBIA EL RELOJ AL OSCILADOR FRC  								*/
 /********************************************************************************/
 //_FOSC(CSW_FSCM_OFF & FRC); 
-#pragma config FOSFPR = HS //FRC             
+#pragma config FOSFPR = FRC//HS             
 // Oscillator (Internal Fast RC (No change to Primary Osc Mode bits))
 #pragma config FCKSMEN = CSW_FSCM_OFF   
 // Clock Switching and Monitor (Sw Disabled, Mon Disabled)
@@ -108,10 +108,11 @@ void configurar_wifi( void );
 void iniciar_interrupciones( void );
 void habilitar_uart( void );
 
-/*FUNCIONES PARA MODULO ESP8266*/
+/*FUNCIONES PARA MODULO WIFI - ESP8266*/
 void iniciar_wifi( void );
 void comandoAT(unsigned char *);
-void enviar_wifi( void );
+void enviar_1B_wifi( char dato );
+void enviar_2B_wifi( short int dato );
 void cerrar_conexion( void );
 
 /*FUNCIONES DE RETARDOS*/
@@ -128,15 +129,24 @@ unsigned char cmdRST[] = "AT+RST\r\n";
 unsigned char cmdCWMODE[] = "AT+CWMODE=1\r\n";
 unsigned char cmdCIPMUX[] = "AT+CIPMUX=0\r\n";
 //unsigned char cmdCWJAP[] = "AT+CWJAP=\"ssid\",\"password\"\r\n";
-unsigned char cmdCWJAP[] = "AT+CWJAP=\"IZZI-6743\",\"50A5DC686743\"\r\n";
+//unsigned char cmdCWJAP[] = "AT+CWJAP=\"IZZI-6743\",\"50A5DC686743\"\r\n";
+unsigned char cmdCWJAP[] = "AT+CWJAP=\"IZZI-6893\",\"2WC468400355\"\r\n";
 unsigned char cmdCIFSR[] = "AT+CIFSR\r\n";
-unsigned char cmdCIPSTART[] = "AT+CIPSTART=\"TCP\",\"192.168.0.2\",6000\r\n";
+unsigned char cmdCIPSTART[] = "AT+CIPSTART=\"TCP\",\"192.168.0.31\",6000\r\n";
 unsigned char cmdCIPMODE[] = "AT+CIPMODE=1\r\n";
 unsigned char cmdCIPSEND[] = "AT+CIPSEND\r\n";
 unsigned char cmdCIPCLOSE[] = "AT+CIPCLOSE\r\n";
 unsigned char cmdSTOPPT[] = "+++";
 
+/*VARIABLES DE SENSORES*/
+short int temperatura, idNodo;
+char idTemperatura;
+
 int main (void){
+    idNodo = 0;
+    idTemperatura = 0;
+    temperatura = 255;
+    
     iniciar_puertos();
     iniciar_uart();
    
@@ -147,8 +157,10 @@ int main (void){
     configurar_wifi();
         
     for( ; EVER ; ){
-        enviar_wifi();
-    
+        enviar_2B_wifi( idNodo );
+        enviar_1B_wifi( idTemperatura );
+        enviar_2B_wifi( temperatura );
+      
         cerrar_conexion();
         asm("nop");   
     }
@@ -216,11 +228,13 @@ void iniciar_puertos( void ){
 void iniciar_uart( void ){
     U1MODE = 0x0000;
     U1STA  = 0x8000;         
-    U1BRG  = 1;
+    //U1BRG  = 1;
+    U1BRG  = 0;
    
     U2MODE = 0x0000;
     U2STA  = 0x8000;   
-    U2BRG  = 1;   
+    //U2BRG  = 1;
+    U1BRG  = 0;
 }
 
 /****************************************************************************/
@@ -235,7 +249,7 @@ void iniciar_interrupciones( void ){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN HABILITA LOS UARTS                                  */
+/* @brief: ESTA FUNCIÓN HABILITA UART1 Y UART2                              */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
 /****************************************************************************/
@@ -316,12 +330,12 @@ void configurar_wifi( void ){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCION ENVIA LOS DATOS QUE ESTAN EN EL FIFO DE UART1       */
-/*         Y DETIENE EL ENVIO MEDIANTE LA CADENA '+++'.*/
-/* @params: NINGUNO                                                         */
+/* @brief: ESTA FUNCION ENVIA DATOS DE 1 BYTE POR EL MODULO WIFI UTILIZANDO */
+/*         EL FIFO DE UART1 Y DETIENE EL ENVIO MEDIANTE LA CADENA '+++'     */
+/* @params: DATO: VALOR QUE SERA ENVIADO POR EL MODULO WIFI                 */
 /* @return: NINGUNO															*/
 /****************************************************************************/
-void enviar_wifi( void ){
+void enviar_1B_wifi( char dato ){
     comandoAT(cmdCIPSTART);
     retardo_1S();
     retardo_1S();
@@ -329,7 +343,7 @@ void enviar_wifi( void ){
     retardo_1S();
     retardo_1S();
     
-    comandoAT(cmdCIPMODE);// SE CONFIGURA MODO "passthrough"
+    comandoAT(cmdCIPMODE); // SE CONFIGURA MODO "passthrough"
     retardo_1S();
     retardo_1S();
     retardo_1S();
@@ -344,10 +358,52 @@ void enviar_wifi( void ){
     retardo_1S();
     retardo_1S();
     
-    U1TXREG = 'H';
-    U1TXREG = '0';
-    U1TXREG = 'L';
-    U1TXREG = 'A';
+    U1TXREG = dato;
+    
+    retardo_1S();
+    retardo_1S();
+    
+    comandoAT(cmdSTOPPT);
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+}
+
+/****************************************************************************/
+/* @brief: ESTA FUNCION ENVIA UN DATO DE 2 BYTES POR EL MODULO WIFI         */
+/*         UTILIZANDO EL FIFO DE UART1 Y DETIENE EL ENVIO MEDIANTE          */ 
+/*         LA CADENA '+++'.                                                 */
+/*         PRIMERO SE ENVIA LA PARTE ALTA DEL DATO Y DESPUES LA PARTE BAJA  */
+/* @params: DATO: VALOR QUE SERA ENVIADO POR EL MODULO WIFI                 */
+/* @return: NINGUNO															*/
+/****************************************************************************/
+void enviar_2B_wifi( short int dato ){
+    comandoAT(cmdCIPSTART);
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    
+    comandoAT(cmdCIPMODE); // SE CONFIGURA MODO "passthrough"
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();  
+    retardo_1S();
+    
+    comandoAT(cmdCIPSEND);
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    
+    U1TXREG = dato & 0xF0;
+    U1TXREG = dato & 0x0F;
     
     retardo_1S();
     retardo_1S();
