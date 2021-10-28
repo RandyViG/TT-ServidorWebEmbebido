@@ -116,36 +116,72 @@ void iniciar_perifericos( void );
 void iniciar_interrupciones( void );
 void habilitar_modulos( void );
 
-short int bandera = 0, humedad = 0, temperatura = 0, gasLP = 0;
+/********************************************************************************/
+/* DECLARACION DE VARIABLES                                                     */
+/********************************************************************************/
+unsigned short int humedad = 0, temperatura = 0, gasLP = 0, bandera = 0; 
+unsigned short int idNodo;
+unsigned char idHumedad, idTemperatura, idGasLP;
 
 int main( void ){
     unsigned char estado;
     
-    iniciar_perifericos();
-    iniciar_uart();
-    iniciar_modulo_I2C();
-    iniciar_adc();
-    iniciar_timer3();
-    iniciar_interrupciones();
-    habilitar_modulos();
+    idNodo = 0;
+    idTemperatura=0;
+    idHumedad=1;
+    idGasLP=2;
     
-    reiniciar_SHT();
-    retardo_100ms();
+    iniciar_perifericos(); //OK
+    iniciar_uart(); //OK
+    iniciar_modulo_I2C(); //OK
+    iniciar_adc(); //OK
+    iniciar_timer3(); //OK
+    iniciar_interrupciones(); //OK
+    habilitar_modulos(); //OK
     
-    iniciar_wifi();
-    configurar_wifi();
+    reiniciar_SHT(); //OK
+    retardo_100ms(); //OK
+    
+    iniciar_wifi();//OK
+    configurar_wifi();//OK
     
     configurar_sensor(); //SHT3xDis
         
     for( ; EVER ; ){
         if( bandera ){
-            estado = realizar_lectura();
+           estado = realizar_lectura();
             if( estado )
-                continue;
+               continue;
+            
+            enviar_wifi();
+            U1TXREG = (idNodo & 0xFF00)>>8;
+            U1TXREG = idNodo & 0x00FF;
+            U1TXREG = idTemperatura;
+            U1TXREG = (temperatura & 0xFF00)>>8;
+            U1TXREG = temperatura & 0x00FF;
             retardo_1S();
-            retardo_1S();
-            enviar_wifi(); //Enviar trama
             cerrar_conexion();
+            
+            enviar_wifi();
+            U1TXREG = (idNodo & 0xFF00)>>8;
+            U1TXREG = idNodo & 0x00FF;
+            U1TXREG = idHumedad;
+            U1TXREG = (humedad & 0xFF00)>>8;
+            U1TXREG = humedad & 0x00FF;
+            retardo_1S();
+            cerrar_conexion();
+            
+            
+            enviar_wifi();
+            U1TXREG = (idNodo & 0xFF00)>>8;
+            U1TXREG = idNodo & 0x00FF;
+            U1TXREG = idGasLP;
+            U1TXREG = (gasLP & 0xFF00)>>8;
+            U1TXREG = gasLP & 0x00FF;
+            retardo_1S();
+            cerrar_conexion();
+            
+            bandera = 0;
         }
         asm("nop");   
     }
@@ -162,6 +198,7 @@ int main( void ){
 /* @return: NINGUNO															*/
 /****************************************************************************/
 void iniciar_perifericos( void ){
+    //Modulo Wi-Fi
     PORTA = 0;
     asm("nop");
     LATA = 0;
@@ -176,6 +213,7 @@ void iniciar_perifericos( void ){
     asm("nop");
     TRISB = 0;
     asm("nop");
+    
     // Entrada Analogica AN2
     TRISBbits.TRISB2 = 1;
     asm("nop");

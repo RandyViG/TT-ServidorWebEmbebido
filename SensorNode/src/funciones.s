@@ -2,7 +2,7 @@
 .GLOBAL _comandoAT
 .global _reiniciar_SHT
     
-.equ	RST,	RD0
+.equ	RST,	RD1
 
 ;******************************************************************************    
 ; @brief: ESTA RUTINA ENVIA LOS COMANDOS AT AL MODULO WIFI MEDIANTE UART1

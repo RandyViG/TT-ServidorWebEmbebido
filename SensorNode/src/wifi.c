@@ -28,11 +28,11 @@ unsigned char cmdSTOPPT[] = "+++";
 void iniciar_uart( void ){
     U1MODE = 0x0000;
     U1STA  = 0x8000;         
-    U1BRG  = 1;
+    U1BRG  = 0; 
    
     U2MODE = 0x0000;
     U2STA  = 0x8000;   
-    U2BRG  = 1;   
+    U2BRG  = 5;   
 }
 
 /****************************************************************************/
@@ -64,8 +64,7 @@ void iniciar_wifi( void ){
 
 /****************************************************************************/
 /* @brief: ESTA FUNCION CONFIGURA EL MODULO ESP2866 COMO CLIENTE TCP Y      */
-/*         HABILITA EL MODO "passthrough" PARA EL ENVIO DE DATOS MEDIANTE   */
-/*         UART1                                                            */
+/*         PARA EL ENVIO DE DATOS MEDIANTE UART1                            */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
 /****************************************************************************/
@@ -93,22 +92,16 @@ void configurar_wifi( void ){
     retardo_1S();
     retardo_1S();
     retardo_1S();
-    retardo_1S();   
-   //comandoAT(cmdCIFSR);
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();
     retardo_1S();     
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCION ENVIA LOS DATOS QUE ESTAN EN EL FIFO DE UART1       */
-/*         Y DETIENE EL ENVIO MEDIANTE LA CADENA '+++'.*/
+/* @brief: ESTA FUNCION ESTABLECE EL INICIO DE ENVIO DE DATOS               */
+/*         MEDIANTE EL MODO "PASSTHROUGH" DEL MODULO ESP2866                */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
 /****************************************************************************/
-void enviar_wifi( void ){
+void enviar_wifi(void){
     comandoAT(cmdCIPSTART);
     retardo_1S();
     retardo_1S();
@@ -116,7 +109,7 @@ void enviar_wifi( void ){
     retardo_1S();
     retardo_1S();
     
-    comandoAT(cmdCIPMODE);// SE CONFIGURA MODO "passthrough"
+    comandoAT(cmdCIPMODE); // SE CONFIGURA MODO "passthrough"
     retardo_1S();
     retardo_1S();
     retardo_1S();
@@ -130,29 +123,19 @@ void enviar_wifi( void ){
     retardo_1S();
     retardo_1S();
     retardo_1S();
-    
-    U1TXREG = 'H';
-    U1TXREG = '0';
-    U1TXREG = 'L';
-    U1TXREG = 'A';
-    
-    retardo_1S();
-    retardo_1S();
-    
-    comandoAT(cmdSTOPPT);
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();
-    retardo_1S();
 }
-
 /****************************************************************************/
 /* @brief: ESTA FUNCION CIERRA LA CONEXION TCP CON EL SERVIDOR.             */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
 /****************************************************************************/
 void cerrar_conexion( void ){
+    comandoAT(cmdSTOPPT);
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
+    retardo_1S();
     comandoAT(cmdCIPCLOSE);
     retardo_1S();
     retardo_1S();
