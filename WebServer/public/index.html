@@ -12,16 +12,16 @@
     <div class="container">
         <section class="sidebar">
             <nav class="sidebar_nav">
-                <img class="icons" src="./src/assets/dashboard-icon.png" alt="">
-                <img class="icons" src="./src/assets/config-icon.svg" alt="">
-                <img class="icons" src="./src/assets/exit-icon-128.png" alt="">
+                <a id="btn-dashboard" ><img class="icons" src="./src/assets/dashboard-icon.png" alt=""></a>
+                <a id="btn-settings"><img class="icons" src="./src/assets/config-icon.svg" alt=""></a>
+                <a id="btn-logout"><img class="icons" src="./src/assets/exit-icon-128.png" alt=""></a>
             </nav>
         </section>
         <section class="content">
             <header class="content_header">
                 <div>
                     <img src="./src/assets/user-icon.png" alt="">
-                    <i>user_name</i>
+                    <i id="nav_usr_name"></i>
                 </div>
             </header>
             <main class="content_main">
@@ -55,5 +55,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./src/js/charts.js"></script>
+    <script src="./src/js/index.js"></script>
 </body>
 </html>

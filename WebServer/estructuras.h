@@ -1,3 +1,5 @@
+#include "mongoose.h"
+
 /******************************************************************
 * @brief: Estructura usada para generar los archivos con los datos
 * de medición de los sensores.
@@ -11,10 +13,28 @@ struct datos_recibidos{
     int bandera_alerta;
 };
 
-struct datos_usuario
-{
+
+/******************************************************************
+* @brief: Estructura usada para guardar los datos del usuario.
+* @param: NINGUNO                                                      
+* @return: NINGUNO														
+******************************************************************/
+struct datos_usuario{
     char *nombre;
     char *password;
     char *email;
     int nodo;
+};
+
+
+/******************************************************************
+* @brief: Estructura usada para guardar los datos de sesión.
+* @param: NINGUNO                                                      
+* @return: NINGUNO														
+******************************************************************/
+struct datos_sesion{
+    int id;
+    uint64_t sha;
+    char *usuario;
+    time_t creacion;
 };
