@@ -30,10 +30,15 @@ __U1RXInterrupt:
 ;*  @param: No recibe paramteros
 ;*  @return: ninguno ( void )
 __T3Interrupt:
-    BTG		LATD,		#LATD3
+    PUSH	W0
+    
+    BTG		PORTD,		#RD3
     MOV		#1,		W0
     MOV		W0,		_bandera
     BCLR    	IFS0,		#T3IF
+    NOP
+    
+    POP		W0
     
     RETFIE
 
@@ -53,9 +58,6 @@ __ADCInterrupt:
     LSR	    	W0,		#4,	    W0  ; W0 >> 4 | W0 = W0 / 4
     
     MOV		W0,		_gasLP
-    ;MOV.B   	WREG,		U2TXREG		; U1TXREG = WO(7:0)
-    ;LSR	    	W0,		#8,	    W0	; W0 >> 8
-    ;MOV.B   	WREG,		U2TXREG		; U1TXREG = WO(15:8)
     
     BCLR    	IFS0,		#ADIF
     POP	    	W1
