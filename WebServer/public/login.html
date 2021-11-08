@@ -12,17 +12,17 @@
 
     <div class="container">
         <section class="left">
-
         </section>
         <section class="right">
-            <form class="form" action="">
+            <form id="login-form" class="form" action="">
                 <h1 class="form-title">Login</h1>
-                <input class="form-input" type="text" placeholder="Usuario">
-                <input class="form-input" type="password" placeholder="Contraseña">
+                <div id="error-msg" class="error-msg-s hidden"><label>Usuario no válido, verifique credenciales</label></div>
+                <input id="usr-form" class="form-input" type="text" placeholder="Usuario">
+                <input id="psw-form" class="form-input" type="password" placeholder="Contraseña">
                 <button class="form-button" type="submit">Enviar</button>
             </form>
         </section>
     </div>
-
+    <script src="./src/js/login.js"></script>
 </body>
 </html>

@@ -39,7 +39,7 @@ void escribir_medidas(int no_nodo,struct datos_recibidos dr,int id_sensor){
     fp = fopen(nombre,"r");
 
     if(fp == NULL)
-        printf("Hubo un error al abrir el archivo");
+        printf("Hubo un error al abrir el archivo\n");
     else{
       while(c!=EOF){
         c=getc(fp);
@@ -87,7 +87,7 @@ void escribir_medidas(int no_nodo,struct datos_recibidos dr,int id_sensor){
 
     fpw = fopen(nombre,"w");
     if(fpw == NULL)
-        printf("Hubo un error al abrir el archivo");
+        printf("Hubo un error al abrir el archivo\n");
     else
       fputs(json,fpw);
     fclose(fpw);
