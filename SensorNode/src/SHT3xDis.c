@@ -20,7 +20,7 @@ extern short int humedad, temperatura;
 /****************************************************************************/
 /* @brief: ESTA FUNCI?N INICIALIZA I2C EN MODO FAST MODE 400KHz             */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 void iniciar_modulo_I2C( void ){
     I2CCON = 0X8000;
@@ -38,12 +38,12 @@ void iniciar_modulo_I2C( void ){
 /*             0X2C-CLOCK STRETCHING ENABLED                                */
 /*             0X0D-REPEATIBILITY MEDIUM                                    */  
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 unsigned char configurar_sensor( void ){
     iniciar_I2C();
     
-    //0X88 (100 0100 0)- ES LA DIRECCI?N DEL SENSOR JUNTO EL BIT DE ESCRITURA
+    //0X88 (100 0100 0)- ES LA DIRECCIÓN DEL SENSOR JUNTO EL BIT DE ESCRITURA
     enviar_dato_I2C(0X88);
     if( I2CSTATbits.ACKSTAT == 1 ) //ACK del sensor
         return NANCK;
@@ -63,9 +63,10 @@ unsigned char configurar_sensor( void ){
 /*         DATOS SENSADOS DE TEMPERATURA Y HUMEDAD. DESPUES LOS MANDA A UNA */
 /*         COMPUTADORA MEDIANTE UART2                                       */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 unsigned char realizar_lectura(void){ 
+    unsigned short int tem[2], hum[2];
     temperatura = 0;
     humedad = 0;
     iniciar_I2C();
@@ -74,16 +75,18 @@ unsigned char realizar_lectura(void){
     if( I2CSTATbits.ACKSTAT == 1 ) //ACK del sensor
         return NANCK;                        
     
-    temperatura = recibe_dato_I2C();
+    tem[0] = recibe_dato_I2C();
     ack_I2C();
-    temperatura = temperatura<<8 | recibe_dato_I2C();
+    tem[1] = recibe_dato_I2C();
     ack_I2C();
-    
-    humedad = recibe_dato_I2C();
+    hum[0] = recibe_dato_I2C();
     ack_I2C();
-    humedad = humedad<<8 | recibe_dato_I2C();
+    hum[1] = recibe_dato_I2C();
     nack_I2C();
     detener_I2C();
+    
+    temperatura = tem[0]<<8 | tem[1];
+    humedad = hum[0]<<8 | hum[1];
 
     retardo_100ms();
     

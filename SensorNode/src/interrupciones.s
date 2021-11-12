@@ -1,5 +1,5 @@
 .include "p30F4013.inc"
-.global __U1RXInterrupt
+.global __U2RXInterrupt
 .global __T3Interrupt
 .global __ADCInterrupt
 
@@ -13,13 +13,13 @@
 ; @params: NINGUNO
 ; @return: NINGUNO
 ;****************************************************************************** 
-__U1RXInterrupt:
+__U2RXInterrupt:
     PUSH    W0
     
-    MOV	    U1RXREG,    W0
-    MOV.B   WREG,	U2TXREG
+    MOV	    U2RXREG,    W0
+    MOV.B   WREG,	U1TXREG
     
-    BCLR    IFS0,	#U1RXIF
+    BCLR    IFS1,	#U2RXIF
     
     POP	    W0
     RETFIE
@@ -32,7 +32,7 @@ __U1RXInterrupt:
 __T3Interrupt:
     PUSH	W0
     
-    BTG		PORTD,		#RD3
+    BTG		LATD,		#LATD3
     MOV		#1,		W0
     MOV		W0,		_bandera
     BCLR    	IFS0,		#T3IF

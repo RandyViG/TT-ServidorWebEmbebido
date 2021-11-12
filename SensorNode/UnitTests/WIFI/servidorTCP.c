@@ -7,7 +7,7 @@
 
 #define PUERTO 6000	//Número de puerto asignado al servidor
 #define COLA_CLIENTES 5 //Tamaño de la cola de espera para clientes
-#define TAM_BUFFER 5
+#define TAM_BUFFER 6
 
 
 int main(int argc, char **argv){
@@ -16,7 +16,7 @@ int main(int argc, char **argv){
 	unsigned char trama[TAM_BUFFER];
 	unsigned short int idNodo, dato;
 	unsigned char idSensor;
-	float voCas, voSensor, lel=0, t=0, h=0;
+	float voCas=0, voSensor=0, lel=0, t=0, h=0;
 
 	memset( &direccion_servidor, 0, sizeof(direccion_servidor) );
 	direccion_servidor.sin_family = AF_INET;
@@ -52,6 +52,8 @@ int main(int argc, char **argv){
 			perror ("Ocurrio algun problema al recibir datos del cliente");
 			exit(1);
 		}
+
+
 		idNodo = trama[0];
 		idNodo = idNodo << 8 | trama[1];
 
@@ -74,7 +76,7 @@ int main(int argc, char **argv){
 			case 2:
 				voCas = (float)dato * ( 3.3 / 4096.0 );
 				voSensor = voCas / 8.0;
-				lel = voSensor / ( (2/45)*h + (1/20)*t + 25.33 );
+				lel = voSensor / ( ( (2/45)*h + (1/20)*t + 25.33 ) * 0.001 );
 				printf("Digital: %u - VCas: %f - Vs: %f\n", dato, voCas, voSensor);
 				printf("Sensor: Gas LP\n LEL: %f\n", lel);
 			break;

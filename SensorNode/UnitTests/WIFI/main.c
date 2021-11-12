@@ -1,11 +1,11 @@
 /********************************************************************************
  *@brief: ESTE PROGRAMA CONFIGURA EL SENSOR WIFI ESP8266EX PARA FUNCIONAR COMO
  *    COMO CLIENTE TCP Y ENVIAR UN MENSAJE DE ECHO AL SERVIDOR. PARA CONFIGURAR
- *    EL MODULO WIFI SE UTILIZAN COMANDOS AT LOS CUALES SE ENVIAN MEDIANTE UART1
- *    Y LAS RESPUESTAS DEL MODULO SE MANDAN A LA COMPUTADORA POR UART2
+ *    EL MODULO WIFI SE UTILIZAN COMANDOS AT LOS CUALES SE ENVIAN MEDIANTE UART2
+ *    Y LAS RESPUESTAS DEL MODULO SE MANDAN A LA COMPUTADORA POR UART1A
  *    NOTA:
- *       ->  EL MODULO SE CONECTA EN EL MIKROBUS1
- *       -> EL MODULO FT232 SE CONECTA AL CONECTOR PMOD4
+ *       -> EL MODULO SE CONECTA EN EL MIKROBUS2
+ *       -> EL MODULO FT232 SE CONECTA AL CONECTOR PMOD3
  * 
  *  ESP8266EX         DSPI30F4013           FT232
  *  ---------       ----------------       ------
@@ -22,34 +22,34 @@
 #include "p30F4013.h"
 
 /********************************************************************************/
-/* 						BITS DE CONFIGURACI?N									*/	
+/* BITS DE CONFIGURACION							*/	
 /********************************************************************************/
 /* SE DESACTIVA EL CLOCK SWITCHING Y EL FAIL-SAFE CLOCK MONITOR (FSCM) Y SE 	*/
-/* ACTIVA EL OSCILADOR INTERNO (FAST RC) PARA TRABAJAR							*/
+/* ACTIVA EL OSCILADOR INTERNO (FAST RC) PARA TRABAJAR	 			*/
 /* FSCM: PERMITE AL DISPOSITIVO CONTINUAR OPERANDO AUN CUANDO OCURRA UNA FALLA 	*/
-/* EN EL OSCILADOR. CUANDO OCURRE UNA FALLA EN EL OSCILADOR SE GENERA UNA 		*/
-/* TRAMPA Y SE CAMBIA EL RELOJ AL OSCILADOR FRC  								*/
+/* EN EL OSCILADOR. CUANDO OCURRE UNA FALLA EN EL OSCILADOR SE GENERA UNA 	*/
+/* TRAMPA Y SE CAMBIA EL RELOJ AL OSCILADOR FRC  				*/
 /********************************************************************************/
 //_FOSC(CSW_FSCM_OFF & FRC); 
-#pragma config FOSFPR = FRC//HS             
+#pragma config FOSFPR = FRC            
 // Oscillator (Internal Fast RC (No change to Primary Osc Mode bits))
 #pragma config FCKSMEN = CSW_FSCM_OFF   
 // Clock Switching and Monitor (Sw Disabled, Mon Disabled)
 
 /********************************************************************************/
-/* SE DESACTIVA EL WATCHDOG														*/
+/* SE DESACTIVA EL WATCHDOG							*/
 /********************************************************************************/
 //_FWDT(WDT_OFF); 
 #pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
 
 /********************************************************************************/
-/* SE ACTIVA EL POWER ON RESET (POR), BROWN OUT RESET (BOR), 					*/	
-/* POWER UP TIMER (PWRT) Y EL MASTER CLEAR (MCLR)								*/
+/* SE ACTIVA EL POWER ON RESET (POR), BROWN OUT RESET (BOR), 			*/	
+/* POWER UP TIMER (PWRT) Y EL MASTER CLEAR (MCLR)				*/
 /* POR: AL MOMENTO DE ALIMENTAR EL DSPIC OCURRE UN RESET CUANDO EL VOLTAJE DE 	*/	
-/* ALIMENTACI?N ALCANZA UN VOLTAJE DE UMBRAL (VPOR), EL CUAL ES 1.85V			*/
-/* BOR: ESTE MODULO GENERA UN RESET CUANDO EL VOLTAJE DE ALIMENTACI?N DECAE		*/
-/* POR DEBAJO DE UN CIERTO UMBRAL ESTABLECIDO (2.7V) 							*/
-/* PWRT: MANTIENE AL DSPIC EN RESET POR UN CIERTO TIEMPO ESTABLECIDO, ESTO 		*/
+/* ALIMENTACI?N ALCANZA UN VOLTAJE DE UMBRAL (VPOR), EL CUAL ES 1.85V		*/
+/* BOR: ESTE MODULO GENERA UN RESET CUANDO EL VOLTAJE DE ALIMENTACI?N DECAE	*/
+/* POR DEBAJO DE UN CIERTO UMBRAL ESTABLECIDO (2.7V) 				*/
+/* PWRT: MANTIENE AL DSPIC EN RESET POR UN CIERTO TIEMPO ESTABLECIDO, ESTO 	*/
 /* AYUDA A ASEGURAR QUE EL VOLTAJE DE ALIMENTACI?N SE HA ESTABILIZADO (16ms) 	*/
 /********************************************************************************/
 //_FBORPOR( PBOR_ON & BORV27 & PWRT_16 & MCLR_EN ); 
@@ -60,7 +60,7 @@
 #pragma config MCLRE  = MCLR_EN          // Master Clear Enable (Enabled)
 
 /********************************************************************************/
-/*SE DESACTIVA EL C?DIGO DE PROTECCI?N											*/
+/*SE DESACTIVA EL C?DIGO DE PROTECCION						*/
 /********************************************************************************/
 //_FGS(CODE_PROT_OFF);      
 // FGS
@@ -68,33 +68,33 @@
 #pragma config GCP = CODE_PROT_OFF // General Segment Code Protection (Disabled)
 
 /********************************************************************************/
-/* SECCI?N DE DECLARACI?N DE CONSTANTES CON DEFINE								*/
+/* SECCI?N DE DECLARACI?N DE CONSTANTES CON DEFINE 				*/
 /********************************************************************************/
 #define EVER 1
 #define MUESTRAS 64
 
 /********************************************************************************/
-/* DECLARACIONES GLOBALES														*/
+/* DECLARACIONES GLOBALES							*/
 /********************************************************************************/
-/*DECLARACI?N DE LA ISR DEL TIMER 1 USANDO __attribute__						*/
+/*DECLARACI?N DE LA ISR DEL TIMER 1 USANDO __attribute__			*/
 /********************************************************************************/
 void __attribute__((__interrupt__)) _T1Interrupt( void );
 
 /********************************************************************************/
-/* CONSTANTES ALMACENADAS EN EL ESPACIO DE LA MEMORIA DE PROGRAMA				*/
+/* CONSTANTES ALMACENADAS EN EL ESPACIO DE LA MEMORIA DE PROGRAMA		*/
 /********************************************************************************/
 int ps_coeff __attribute__ ((aligned (2), space(prog)));
 /********************************************************************************/
-/* VARIABLES NO INICIALIZADAS EN EL ESPACIO X DE LA MEMORIA DE DATOS			*/
+/* VARIABLES NO INICIALIZADAS EN EL ESPACIO X DE LA MEMORIA DE DATOS		*/
 /********************************************************************************/
 int x_input[MUESTRAS] __attribute__ ((space(xmemory)));
 /********************************************************************************/
-/* VARIABLES NO INICIALIZADAS EN EL ESPACIO Y DE LA MEMORIA DE DATOS			*/
+/* VARIABLES NO INICIALIZADAS EN EL ESPACIO Y DE LA MEMORIA DE DATOS		*/
 /********************************************************************************/
 int y_input[MUESTRAS] __attribute__ ((space(ymemory)));
 /********************************************************************************/
 /* VARIABLES NO INICIALIZADAS LA MEMORIA DE DATOS CERCANA (NEAR), LOCALIZADA	*/
-/* EN LOS PRIMEROS 8KB DE RAM													*/
+/* EN LOS PRIMEROS 8KB DE RAM							*/
 /********************************************************************************/
 int var1 __attribute__ ((near));
 
@@ -128,10 +128,10 @@ unsigned char cmdRST[] = "AT+RST\r\n";
 unsigned char cmdCWMODE[] = "AT+CWMODE=1\r\n";
 unsigned char cmdCIPMUX[] = "AT+CIPMUX=0\r\n";
 //unsigned char cmdCWJAP[] = "AT+CWJAP=\"ssid\",\"password\"\r\n";
-//unsigned char cmdCWJAP[] = "AT+CWJAP=\"IZZI-6743\",\"50A5DC686743\"\r\n";
-unsigned char cmdCWJAP[] = "AT+CWJAP=\"IZZI-6893\",\"2WC468400355\"\r\n";
+unsigned char cmdCWJAP[] = "AT+CWJAP=\"IZZI-6743\",\"50A5DC686743\"\r\n";
+//unsigned char cmdCWJAP[] = "AT+CWJAP=\"IZZI-6893\",\"2WC468400355\"\r\n";
 unsigned char cmdCIFSR[] = "AT+CIFSR\r\n";
-unsigned char cmdCIPSTART[] = "AT+CIPSTART=\"TCP\",\"192.168.0.31\",6000\r\n";
+unsigned char cmdCIPSTART[] = "AT+CIPSTART=\"TCP\",\"192.168.0.14\",6000\r\n";
 unsigned char cmdCIPMODE[] = "AT+CIPMODE=1\r\n";
 unsigned char cmdCIPSEND[] = "AT+CIPSEND\r\n";
 unsigned char cmdCIPCLOSE[] = "AT+CIPCLOSE\r\n";
@@ -157,11 +157,11 @@ int main (void){
         
     for( ; EVER ; ){
         enviar_wifi();
-        U1TXREG = (idNodo & 0xFF00)>>8;
-        U1TXREG = idNodo & 0x00FF;
-        U1TXREG = idTemperatura;
-        U1TXREG = (temperatura & 0xFF00)>>8;
-        U1TXREG = temperatura & 0x00FF;
+        U2TXREG = (idNodo & 0xFF00)>>8;
+        U2TXREG = idNodo & 0x00FF;
+        U2TXREG = idTemperatura;
+        U2TXREG = (temperatura & 0xFF00)>>8;
+        U2TXREG = temperatura & 0x00FF;
         
         retardo_1S();
         
@@ -173,19 +173,27 @@ int main (void){
 }
 
 /****************************************************************************/
+<<<<<<< HEAD
 /* @brief: ESTA FUNCIï¿½N INICIALIZA LOS PERIFERICOS DEL MICROCONTROLADOR     */
 /*         NECESARIOS PARA LA COMUNICACIï¿½N CON EL SENSOR MEDIANTE UART1,    */
 /*         PARA LA COMUNICACIï¿½N MEDIANTE UART2 Y PARA EL ENVIO DE LAS       */
 /*         SEï¿½ALES DE RESET Y ENABLE AL MODULO                              */
+=======
+/* @brief: ESTA FUNCIÓN INICIALIZA LOS PERIFERICOS DEL MICROCONTROLADOR     */
+/*         NECESARIOS PARA LA COMUNICACIÓN CON EL MODULO WIFI ESP8266,      */
+/*         MEDIANTE UART2 Y PARA EL ENVIO DE LAS SEÑALES DE RESET Y         */
+/*         ENABLE AL MODULO                                                 */
+>>>>>>> c52154b (Cambiando Wifi a UART2)
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 void iniciar_puertos( void ){
-    PORTA = 0;
+    
+    PORTB = 0;
     asm("nop");
-    LATA = 0;
+    LATB = 0;
     asm("nop");
-    TRISA = 0;
+    TRISB = 0;
     asm("nop");
     
     PORTD = 0;
@@ -202,10 +210,10 @@ void iniciar_puertos( void ){
     TRISF = 0;
     asm("nop");
 
-    //UART1
-    TRISFbits.TRISF2 = 1;   //U1RX-RF2
+    //UART1    
+    TRISCbits.TRISC14 = 1;   //UA1RX-RC14
     asm("nop");
-    TRISFbits.TRISF3 = 0;   //U1TX-RF3
+    TRISCbits.TRISC13 = 0;   //UA1TX-RC13
     asm("nop");
     
     //UART2
@@ -215,54 +223,61 @@ void iniciar_puertos( void ){
     asm("nop");
     
     //CS - ENABLE PARA EL WIFI
-    TRISAbits.TRISA11 = 0;
+    TRISBbits.TRISB8 = 0;
     asm("nop");
     
     //RESET PARA EL WIFI
-    TRISDbits.TRISD0 = 0;
-    asm("nop");     
+    TRISDbits.TRISD1 = 0;
+    asm("nop");
+    
+    ADPCFG = 0xFFFF;
+    asm("nop");
+    
 }
 
 /****************************************************************************/
+<<<<<<< HEAD
 /* @brief: ESTA FUNCIï¿½N CONFIGURA EL UART1 Y UART2 CON LA VELOCIDAD DE      */
 /*         115200 BAUDIOS                                                   */
+=======
+/* @brief: ESTA FUNCIÓN CONFIGURA EL UART1 ALTERNO Y UART2 CON LA           */
+/*         VELOCIDAD DE 115200 BAUDIOS                                      */
+>>>>>>> c52154b (Cambiando Wifi a UART2)
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 void iniciar_uart( void ){
-    U1MODE = 0x0000;
+    U1MODE = 0x0420;
     U1STA  = 0x8000;         
-    //U1BRG  = 1;
     U1BRG  = 0;
    
-    U2MODE = 0x0000;
-    U2STA  = 0x8000;   
-    //U2BRG  = 1;
+    U2MODE = 0x0020;
+    U2STA  = 0x8000;
     U1BRG  = 0;
 }
 
 /****************************************************************************/
 /* @brief: ESTA FUNCIï¿½N INICIALIZA LAS INTERRUPCIONES                       */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 void iniciar_interrupciones( void ){
-    // SE HABILITA LA INTERRUPCION RX DEL UART1
-    IFS0bits.U1RXIF = 0;
-    IEC0bits.U1RXIE = 1;
+    // SE HABILITA LA INTERRUPCION RX DEL UART2
+    IFS1bits.U2RXIF = 0;
+    IEC1bits.U2RXIE = 1;
 }
 
 /****************************************************************************/
 /* @brief: ESTA FUNCIï¿½N HABILITA UART1 Y UART2                              */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 void habilitar_uart( void ){
-    U2MODEbits.UARTEN = 1;
-    U2STAbits.UTXEN   = 1;
-   
     U1MODEbits.UARTEN = 1;
-    U1STAbits.UTXEN   = 1;       
+    U1STAbits.UTXEN   = 1; 
+    
+    U2MODEbits.UARTEN = 1;
+    U2STAbits.UTXEN   = 1;      
 }
 
 /****************************************************************************/
@@ -273,30 +288,30 @@ void habilitar_uart( void ){
 /*                              |       |                                   */
 /*                              ---------                                   */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 void iniciar_wifi( void ){
-    PORTAbits.RA11 = 1;
+    PORTBbits.RB8 = 1;
     asm("nop");
     retardo_1S();
-    retardo_1S();
-    retardo_1S();
-    PORTDbits.RD0 = 1;
+    //retardo_1S();
+    //retardo_1S();
+    PORTDbits.RD1 = 1;
     asm("nop");
     retardo_1S();
-    PORTDbits.RD0 = 0;
+    PORTDbits.RD1 = 0;
     asm("nop");
     retardo_1S();
-    PORTDbits.RD0 = 1;
+    PORTDbits.RD1 = 1;
     asm("nop");
     retardo_1S();
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCION CONFIGURA EL MODULO ESP2866 COMO CLIENTE TCP Y      */
+/* @brief: ESTA FUNCION CONFIGURA EL MODULO ESP8266 COMO CLIENTE TCP Y      */
 /*         PARA EL ENVIO DE DATOS MEDIANTE UART1                            */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 void configurar_wifi( void ){
     comandoAT(cmdRST);
@@ -329,9 +344,9 @@ void configurar_wifi( void ){
 
 /****************************************************************************/
 /* @brief: ESTA FUNCION ESTABLECE EL INICIO DE ENVIO DE DATOS               */
-/*         MEDIANTE EL MODO "PASSTHROUGH" DEL MODULO ESP2866                */
+/*         MEDIANTE EL MODO "PASSTHROUGH" DEL MODULO ESP8266                */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 void enviar_wifi(void){
     comandoAT(cmdCIPSTART);
@@ -360,7 +375,7 @@ void enviar_wifi(void){
 /****************************************************************************/
 /* @brief: ESTA FUNCION CIERRA LA CONEXION TCP CON EL SERVIDOR.             */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 void cerrar_conexion( void ){
     comandoAT(cmdSTOPPT);
