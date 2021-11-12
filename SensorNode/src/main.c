@@ -1,19 +1,25 @@
 /********************************************************************************
- *@brief: 
- * 
+ * @brief: *ESTE PROGRAMA CONFIGURA TODOS LOS MODULOS DEL NODO SENSOR (MC101,
+ * SHT3X-Dis, Wi - Fi) PARA QUE FUNCIONEN EN CONJUNTO Y OBTENGAN LAS MUESTRAS
+ * DE GAS LP, HUMEDAD Y TEMPERATURA LA CUALES SERAN ENVIADAS AL SERVIDOR WEB
+ * EMBEBIDO CON EL FORMATO DE LA TRAMA ESTABLECIDO.
+ * NOTA:
+ *   -> MÓDULO WI - FI SE CONECTA AL MIKROBUS DOS.
+ *   -> SENSOR SHT3XDIS SE CONECTA AL MIKROBUS UNO.
+ *   -> MC101 SE CONECTA EN LA ENTRADA ANALÓGICA DOS.
  * @device: DSPIC30F4013
- * @oscillator: HS, 14.7456MHz
- *******************************************************************************/
+ * @oscillator: FRC, 7.3728MHz 
+*******************************************************************************/
 #include "p30F4013.h"
 #include "MC101.h"
 #include "SHT3xDis.h"
 #include "wifi.h"
 
 /********************************************************************************/
-/* 						BITS DE CONFIGURACI?N		*/	
+/* BITS DE CONFIGURACION							*/	
 /********************************************************************************/
 /* SE DESACTIVA EL CLOCK SWITCHING Y EL FAIL-SAFE CLOCK MONITOR (FSCM) Y SE 	*/
-/* ACTIVA EL OSCILADOR INTERNO (FAST RC) PARA TRABAJAR			        */
+/* ACTIVA EL OSCILADOR INTERNO (FAST RC) PARA TRABAJAR				*/
 /* FSCM: PERMITE AL DISPOSITIVO CONTINUAR OPERANDO AUN CUANDO OCURRA UNA FALLA 	*/
 /* EN EL OSCILADOR. CUANDO OCURRE UNA FALLA EN EL OSCILADOR SE GENERA UNA 	*/
 /* TRAMPA Y SE CAMBIA EL RELOJ AL OSCILADOR FRC  				*/
@@ -56,7 +62,7 @@
 #pragma config GCP = CODE_PROT_OFF // General Segment Code Protection (Disabled)
 
 /********************************************************************************/
-/* SECCI?N DE DECLARACI?N DE CONSTANTES CON DEFINE				*/
+/* SECCI?N DE DECLARACION DE CONSTANTES CON DEFINE				*/
 /********************************************************************************/
 #define EVER 1
 #define MUESTRAS 64
@@ -124,12 +130,13 @@ unsigned short int idNodo;
 unsigned char idHumedad, idTemperatura, idGasLP;
 
 int main( void ){
+    int i;
     unsigned char estado;
     
     idNodo = 0;
-    idTemperatura=0;
-    idHumedad=1;
-    idGasLP=2;
+    idTemperatura = 0;
+    idHumedad = 1;
+    idGasLP = 2;
     
     iniciar_perifericos();
     iniciar_uart();
@@ -139,7 +146,6 @@ int main( void ){
     iniciar_interrupciones();
     habilitar_modulos();
     
-    
     reiniciar_SHT();
     retardo_100ms();
     
@@ -147,7 +153,12 @@ int main( void ){
     configurar_wifi();
     
     iniciar_interrupciones();
-    habilitar_modulos(); 
+    habilitar_modulos();
+    
+    for( i = 0; i < 50 ; i++ ){
+        configurar_sensor();
+        realizar_lectura();
+    }
         
     for( ; EVER ; ){
         if( bandera ){
@@ -157,38 +168,39 @@ int main( void ){
             estado = realizar_lectura();
             if( estado )
                continue;
-            
+            retardo_1S();
             enviar_wifi();
             retardo_1S();
-            U1TXREG = (idNodo & 0xFF00)>>8;
-            U1TXREG = idNodo & 0x00FF;
-            U1TXREG = idTemperatura;
-            U1TXREG = (temperatura & 0xFF00)>>8;
-            U1TXREG = temperatura & 0x00FF;
+            U2TXREG = (idNodo & 0xFF00)>>8;
+            U2TXREG = idNodo & 0x00FF;
+            U2TXREG = idTemperatura;
+            U2TXREG = (temperatura & 0xFF00)>>8;
+            U2TXREG = temperatura & 0x00FF;
             retardo_1S();
             cerrar_conexion();
             
             enviar_wifi();
             retardo_1S();
-            U1TXREG = (idNodo & 0xFF00)>>8;
-            U1TXREG = idNodo & 0x00FF;
-            U1TXREG = idHumedad;
-            U1TXREG = (humedad & 0xFF00)>>8;
-            U1TXREG = humedad & 0x00FF;
+            U2TXREG = (idNodo & 0xFF00)>>8;
+            U2TXREG = idNodo & 0x00FF;
+            U2TXREG = idHumedad;
+            U2TXREG = (humedad & 0xFF00)>>8;
+            U2TXREG = humedad & 0x00FF;
             retardo_1S();
             cerrar_conexion();
             
             enviar_wifi();
             retardo_1S();
-            U1TXREG = (idNodo & 0xFF00)>>8;
-            U1TXREG = idNodo & 0x00FF;
-            U1TXREG = idGasLP;
-            U1TXREG = (gasLP & 0xFF00)>>8;
-            U1TXREG = gasLP & 0x00FF;
+            U2TXREG = (idNodo & 0xFF00)>>8;
+            U2TXREG = idNodo & 0x00FF;
+            U2TXREG = idGasLP;
+            U2TXREG = (gasLP & 0xFF00)>>8;
+            U2TXREG = gasLP & 0x00FF;
             retardo_1S();
             cerrar_conexion();
             
             bandera = 0;
+            retardo_1S();
         }
         asm("nop");   
     }
@@ -205,13 +217,6 @@ int main( void ){
 /* @return: NINGUNO							    */
 /****************************************************************************/
 void iniciar_perifericos( void ){
-    //Modulo Wi-Fi
-    PORTA = 0;
-    asm("nop");
-    LATA = 0;
-    asm("nop");
-    TRISA = 0;
-    asm("nop");
     
     //ADC
     PORTB = 0;
@@ -232,7 +237,7 @@ void iniciar_perifericos( void ){
     TRISD = 0;
     asm("nop");
     
-    // UARTs
+    // UART
     PORTF = 0;
     asm("nop");
     LATF = 0;
@@ -246,7 +251,6 @@ void iniciar_perifericos( void ){
     TRISCbits.TRISC13 = 0;   //UA1TX-RF3
     asm("nop");
     
-    
     // UART2
     TRISFbits.TRISF4 = 1;   //U2Tx-RF4
     asm("nop");
@@ -254,13 +258,17 @@ void iniciar_perifericos( void ){
     asm("nop");
     
     //CS - ENABLE PARA EL WIFI
-    TRISAbits.TRISA11 = 0;
+    TRISBbits.TRISB8 = 0;
     asm("nop");
     
     //RESET PARA EL WIFI
+    TRISDbits.TRISD1 = 0;
+    asm("nop");
+    
+    //RESET SHT3x-DIS
     TRISDbits.TRISD0 = 0;
     asm("nop");
-
+    //TIMER
     TRISDbits.TRISD3 = 0;
     asm("nop");
 }
@@ -272,17 +280,17 @@ void iniciar_interrupciones( void ){
     // Timer3
     IFS0bits.T3IF = 0;
     IEC0bits.T3IE = 1;
-    // UART1-Rx
-    IFS0bits.U1RXIF = 0;
-    IEC0bits.U1RXIE = 1;
+    // UART2-Rx
+    IFS1bits.U2RXIF = 0;
+    IEC1bits.U2RXIE = 1;
 }
 
 void habilitar_modulos( void ){
     T3CONbits.TON = 1;     //Encendiendo TIMER3
     ADCON1bits.ADON = 1;   //Encendiendo ADC
-    U2MODEbits.UARTEN = 1; //Encendiendo UART2
-    U2STAbits.UTXEN = 1;   //Habilitando transmision
     U1MODEbits.UARTEN = 1; //Encendiendo UART1
     U1STAbits.UTXEN = 1;   //Habilitando transmisions
-    I2CCONbits.I2CEN = 1;
+    U2MODEbits.UARTEN = 1; //Encendiendo UART2
+    U2STAbits.UTXEN = 1;   //Habilitando transmision
+    I2CCONbits.I2CEN = 1;  //Habilitando I2C
 }
