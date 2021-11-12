@@ -5,6 +5,8 @@
 #include "mjson.h"
 #include "procesamiento.h"
 #include "sesion.h"
+#include "usuario.h"
+#include "websockets.h"
 
 /*Variables globales*/
 extern int fin;
@@ -55,6 +57,8 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
                 // LOG(LL_INFO,("COOK_ %s LEN_ %ld",head_buff,s->len));
                 if(validar_cookie(head_buff,s->len) > 0){
                     mg_http_serve_file( c, hm, "./public/index.html",&opts);
+                    // Crear el ws
+                    //crear_ws(8001);
                 }else{
                     mg_http_serve_file( c, hm, "./public/login.html",&opts);
                 }
