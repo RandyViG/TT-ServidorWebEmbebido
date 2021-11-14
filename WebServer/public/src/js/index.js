@@ -7,18 +7,6 @@ btnDashboard = document.getElementById("btn-dashboard");
 
 btnLogout.addEventListener('click',logout);
 
-const socket = new WebSocket('ws://localhost:8000');
-
-// Abre la conexión
-socket.addEventListener('open', function (event) {
-    socket.send('Hello Server!');
-});
-
-// Escucha por mensajes
-socket.addEventListener('message', function (event) {
-    console.log('Message from server', event.data);
-});
-
 function setName() {
     let arr = document.cookie.split(';');
     for(let atr of arr){
@@ -33,5 +21,3 @@ function setName() {
 function logout(){
     window.location.href = '/logout';
 }
-
-

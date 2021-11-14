@@ -220,3 +220,13 @@ void procesar_cadena(unsigned char *str,struct datos_recibidos *dr){
 
   escribir_medidas(id_nodo,*dr,id_sensor);
 }
+
+int str_len(char *str){
+    int i=0;
+
+    while(str[i]!='\0'){
+        // printf("%c",str[i]);
+        i++;
+    }
+    return i+1;
+}

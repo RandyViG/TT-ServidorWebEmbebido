@@ -1,2 +1,2 @@
-int crear_ws(int puerto);
 int generar_puerto();
+void crear_ws(int puerto);
