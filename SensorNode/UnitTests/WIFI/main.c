@@ -99,9 +99,9 @@ int y_input[MUESTRAS] __attribute__ ((space(ymemory)));
 int var1 __attribute__ ((near));
 
 /********************************************************************************
- * DECLARACIÓN DE FUNCIONES
+ * DECLARACIÃ“N DE FUNCIONES
  ********************************************************************************/
-/*FUNCIONES PARA CONFIGURACIÓN*/
+/*FUNCIONES PARA CONFIGURACIÃ“N*/
 void iniciar_puertos( void );
 void iniciar_uart( void );
 void configurar_wifi( void );
@@ -121,9 +121,9 @@ void retardo_20ms(void);
 void retardo_1S(void);
 
 /********************************************************************************
- * DECLARACIÓN DE VARIABLES GLOBALES
+ * DECLARACIÃ“N DE VARIABLES GLOBALES
  ********************************************************************************/
-/*COMANDOS AT DE CONFIGURACIÓN*/
+/*COMANDOS AT DE CONFIGURACIÃ“N*/
 unsigned char cmdRST[] = "AT+RST\r\n";
 unsigned char cmdCWMODE[] = "AT+CWMODE=1\r\n";
 unsigned char cmdCIPMUX[] = "AT+CIPMUX=0\r\n";
@@ -157,14 +157,14 @@ int main (void){
         
     for( ; EVER ; ){
         enviar_wifi();
+      
         U2TXREG = (idNodo & 0xFF00)>>8;
         U2TXREG = idNodo & 0x00FF;
         U2TXREG = idTemperatura;
         U2TXREG = (temperatura & 0xFF00)>>8;
         U2TXREG = temperatura & 0x00FF;
         
-        retardo_1S();
-        
+        retardo_1S();  
         cerrar_conexion();
         asm("nop");   
     }
@@ -173,9 +173,9 @@ int main (void){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN INICIALIZA LOS PERIFERICOS DEL MICROCONTROLADOR     */
-/*         NECESARIOS PARA LA COMUNICACIÓN CON EL MODULO WIFI ESP8266,      */
-/*         MEDIANTE UART2 Y PARA EL ENVIO DE LAS SEÑALES DE RESET Y         */
+/* @brief: ESTA FUNCIÃ“N INICIALIZA LOS PERIFERICOS DEL MICROCONTROLADOR     */
+/*         NECESARIOS PARA LA COMUNICACIÃ“N CON EL MODULO WIFI ESP8266,      */
+/*         MEDIANTE UART2 Y PARA EL ENVIO DE LAS SEÃ‘ALES DE RESET Y         */
 /*         ENABLE AL MODULO                                                 */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO							    */
@@ -229,7 +229,7 @@ void iniciar_puertos( void ){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN CONFIGURA EL UART1 ALTERNO Y UART2 CON LA           */
+/* @brief: ESTA FUNCIÃ“N CONFIGURA EL UART1 ALTERNO Y UART2 CON LA           */
 /*         VELOCIDAD DE 115200 BAUDIOS                                      */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO							    */
@@ -241,11 +241,11 @@ void iniciar_uart( void ){
    
     U2MODE = 0x0020;
     U2STA  = 0x8000;
-    U1BRG  = 0;
+    U2BRG  = 0;
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN INICIALIZA LAS INTERRUPCIONES                       */
+/* @brief: ESTA FUNCIÃ“N INICIALIZA LAS INTERRUPCIONES                       */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO							    */
 /****************************************************************************/
@@ -256,9 +256,9 @@ void iniciar_interrupciones( void ){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN HABILITA UART1 Y UART2                              */
+/* @brief: ESTA FUNCIÃ“N HABILITA UART1 Y UART2                              */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO							    */
+/* @return: NINGUNO							                                            */
 /****************************************************************************/
 void habilitar_uart( void ){
     U1MODEbits.UARTEN = 1;
@@ -269,14 +269,14 @@ void habilitar_uart( void ){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN INICIALIZA EL ESP8266 COLOCANDO UN PUSLO EN SRT Y   */
+/* @brief: ESTA FUNCIÃ“N INICIALIZA EL ESP8266 COLOCANDO UN PUSLO EN SRT Y   */
 /*         HABILITANDO LA BANDERA DE ENABLE                                 */
 /*                  RST --------         --------                           */
 /*                              |       |                                   */
 /*                              |       |                                   */
 /*                              ---------                                   */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO							    */
+/* @return: NINGUNO							                                            */
 /****************************************************************************/
 void iniciar_wifi( void ){
     PORTBbits.RB8 = 1;
@@ -299,7 +299,7 @@ void iniciar_wifi( void ){
 /* @brief: ESTA FUNCION CONFIGURA EL MODULO ESP8266 COMO CLIENTE TCP Y      */
 /*         PARA EL ENVIO DE DATOS MEDIANTE UART1                            */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO							    */
+/* @return: NINGUNO							                                            */
 /****************************************************************************/
 void configurar_wifi( void ){
     comandoAT(cmdRST);
@@ -334,7 +334,7 @@ void configurar_wifi( void ){
 /* @brief: ESTA FUNCION ESTABLECE EL INICIO DE ENVIO DE DATOS               */
 /*         MEDIANTE EL MODO "PASSTHROUGH" DEL MODULO ESP8266                */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO							    */
+/* @return: NINGUNO							                                            */
 /****************************************************************************/
 void enviar_wifi(void){
     comandoAT(cmdCIPSTART);
@@ -363,7 +363,7 @@ void enviar_wifi(void){
 /****************************************************************************/
 /* @brief: ESTA FUNCION CIERRA LA CONEXION TCP CON EL SERVIDOR.             */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO							    */
+/* @return: NINGUNO							                                            */
 /****************************************************************************/
 void cerrar_conexion( void ){
     comandoAT(cmdSTOPPT);

@@ -7,8 +7,8 @@
 
 #define PUERTO 6000	//Número de puerto asignado al servidor
 #define COLA_CLIENTES 5 //Tamaño de la cola de espera para clientes
-#define TAM_BUFFER 6
 
+#define TAM_BUFFER 6
 
 int main(int argc, char **argv){
 	int sockfd, cliente_sockfd;
@@ -16,6 +16,7 @@ int main(int argc, char **argv){
 	unsigned char trama[TAM_BUFFER];
 	unsigned short int idNodo, dato;
 	unsigned char idSensor;
+  
 	float voCas=0, voSensor=0, lel=0, t=0, h=0;
 
 	memset( &direccion_servidor, 0, sizeof(direccion_servidor) );
@@ -52,7 +53,6 @@ int main(int argc, char **argv){
 			perror ("Ocurrio algun problema al recibir datos del cliente");
 			exit(1);
 		}
-
 
 		idNodo = trama[0];
 		idNodo = idNodo << 8 | trama[1];
