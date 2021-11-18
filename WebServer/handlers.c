@@ -57,8 +57,7 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
                 // LOG(LL_INFO,("COOK_ %s LEN_ %ld",head_buff,s->len));
                 if(validar_cookie(head_buff,s->len) > 0){
                     mg_http_serve_file( c, hm, "./public/index.html",&opts);
-                    // Crear el ws
-                    //crear_ws(8001);
+
                 }else{
                     mg_http_serve_file( c, hm, "./public/login.html",&opts);
                 }
@@ -66,9 +65,9 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
                 mg_http_serve_file( c, hm, "./public/login.html",&opts);
             }       
         }
-        else if( mg_http_match_uri( hm, "/login" ) )
+        else if( mg_http_match_uri( hm, "/login" ) ){
             mg_http_serve_file( c, hm, "./public/login.html",&opts);
-
+        }
         else if(mg_http_match_uri( hm, "/login_data" )){
             /*Ruta que valida si ls datos de sesión mandados por el usuario son válidos o no.*/
             /*Si los datos son válidos son correctos se regresan los datos de sesión al usuario
@@ -122,6 +121,13 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
                     mg_http_reply(c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}", 500);
                 }
             }
+        }
+        else if(mg_http_match_uri( hm, "/datos_sensor" )){
+            // Crear el ws
+            int puerto = generar_puerto();
+            printf("S: %d",puerto);
+            mg_http_reply( c, 200, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"port\":%d,\"result\": %d}", puerto,200);
+            crear_ws(puerto);
         }
         else if( mg_http_match_uri( hm, "/form" ) )
             mg_http_serve_file( c, hm, "./public/form_user.html",&opts);

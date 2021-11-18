@@ -30,21 +30,21 @@
                     <div class="canva">
                         <canvas class="canva" id="myChart" width="400" height="400"></canvas>
                     </div>
-                    <h2 class="chart-data">22 °C</h2>
+                    <h2 id="temp-data" class="chart-data">-</h2>
                 </div>
                 <div class="chart">
                     <h1 class="chart-title">Gas LP</h1>
                     <div class="canva">
                         <canvas id="myChart2" width="400" height="400"></canvas>
                     </div>
-                    <h2 class="chart-data">8.1%</h2>
+                    <h2 id="gas-data" class="chart-data">-</h2>
                 </div>
                 <div class="chart">
                     <h1 class="chart-title">Humedad</h1>
                     <div class="canva">
                         <canvas id="myChart3" width="400" height="400"></canvas>
                     </div>
-                    <h2 class="chart-data">15%</h2>
+                    <h2 id="hum-data" class="chart-data">-</h2>
                 </div>
             </main>
             <footer class="content_footer">
@@ -52,9 +52,13 @@
             </footer>
         </section>
     </div>
-
+    <script type='text/javascript' > 
+        var graph_data = {"temp":0.0,"hum":0.0,"gas":0.0}; 
+        var myChart,myChart2,myChart3;
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./src/js/charts.js"></script>
     <script src="./src/js/index.js"></script>
+    <script src="./src/js/ws.js"></script>
 </body>
 </html>
