@@ -36,7 +36,7 @@ void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
         char strS[300];
         int len;
 
-        leer_medidas(1,&datos);
+        leer_medidas(0,&datos);
         sprintf(strS,"{\"hum\":%.2f,\"gas\":%.2f,\"temp\":%.2f}",datos.medicion_hum,datos.medicion_gas,datos.medicion_temp);
         len=str_len(strS);
         sleep(1);

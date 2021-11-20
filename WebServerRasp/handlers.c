@@ -34,7 +34,7 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
     if( ev == MG_EV_HTTP_MSG ){
         struct mg_http_message *hm = (struct mg_http_message *) datos_ev;
         struct mg_http_serve_opts opts = {.mime_types = "text/html",.extra_headers = "Access-Control-Allow-Origin: *\r\n"};
-        LOG(LL_INFO,("Algo se ha recibido en el servidor HTTP"));                      
+        LOG(LL_INFO,("Evento recibido en el servidor HTTP"));                      
 
         if( mg_http_match_uri( hm, "/hi" ) ){
             char name[100];
@@ -81,10 +81,10 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
                 if(n>0){
                     if(validar_usuario(usr,psw)>0){
                         if(agregar_sesion(usr,&sesion) > 0){
-                            sprintf(str_sha,"%lu",sesion.sha);
+                            sprintf(str_sha,"%llu",sesion.sha);
                             mg_http_reply(c, 200, "Content-Type: application/json\r\n"
                             "Access-Control-Allow-Origin: *\r\n","{\"result\": %d,\"id\": %d,\"sha\": \"%s\",\"user\": \"%s\"}", 200,sesion.id,str_sha,sesion.usuario);
-                            LOG(LL_INFO,("sha_ %lu ",sesion.sha));
+                            LOG(LL_INFO,("sha_ %llu ",sesion.sha));
                         }else{
                             LOG(LL_ERROR,("NO SE HA PODIDO AGREGAR SESION!"));
                         }
@@ -160,7 +160,7 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
 void manejador_tcp(struct mg_connection *c, int ev, void *datos_ev, void *datos_fn) {
     if (ev == MG_EV_READ) {
         struct datos_recibidos dr;
-        LOG(LL_INFO, ("Algo ha sido recibido"));
+        LOG(LL_INFO, ("Una trama ha sido recibida"));
 
         procesar_cadena((unsigned char*)(c->recv.buf),&dr);
 

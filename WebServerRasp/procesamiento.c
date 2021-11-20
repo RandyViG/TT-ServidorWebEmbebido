@@ -8,105 +8,6 @@
 #include <pthread.h>
 
 extern pthread_mutex_t sensores_lock;
-/******************************************************************
-* @brief: Rutina que se encargará de escribir los datos en el 
-* repositorio
-* @param: Número de nodo sensor, estructura con los datos recibidos
-* previamente desempaquetados y id del sensor al que se escribirá
-* el valor                                                
-* @return: 1 si se escribió correctamente, 0 si no												
-******************************************************************/
-int escribir_medidas(int no_nodo,struct datos_recibidos dr,int id_sensor){
-    FILE *fp,*fpw;
-    char s2[60];
-    char nombre[30];
-    char s1[100];
-    char c;
-    int i=0,j=0;
-    char *res = NULL,json[300];
-
-    switch (id_sensor)
-    {
-    case 1:
-      sprintf(s2,"{\"temp\":%.2f}",dr.medicion_temp);
-      break;
-    case 2:
-      sprintf(s2,"{\"hum\":%.2f}",dr.medicion_hum);
-      break;
-    case 3:
-      sprintf(s2,"{\"gas\":%.2f}",dr.medicion_gas);
-    default:
-      break;
-    }
-    sprintf(nombre,"nodo%d.json",no_nodo);
-
-    fp = fopen(nombre,"r");
-
-    if(fp == NULL){
-        printf("Hubo un error al abrir el archivo\n");
-        fp = fopen(nombre,"w");
-        fclose(fp);
-        return -1;
-    }
-    else{
-      while(c!=EOF){
-        c=getc(fp);
-        s1[i] = c;
-        i++;
-      }
-      if(i<3){
-        i=3;
-        s1[0]='{';
-        s1[1]='}';
-        s1[3]='\0';
-      }
-    }
-
-    mjson_merge(s1,i,s2,strlen(s2),&mjson_print_dynamic_buf,&res);
-    
-    /*Para no imprimir en una sola linea el json*/
-    i=0;
-    j=0;
-    while(res[i] != '\0'){
-      if(res[i] == '{' || res[i] == ','){
-        json[j]=res[i];
-        j++;
-        json[j]='\n';
-        j++;
-        json[j]='\t';
-        j++;
-        i++;
-      }
-      else if(res[i]=='}'){
-        json[j]='\n';
-        j++;
-        json[j]='}';
-        j++;
-        json[j]='\0';
-        break;
-      }
-      else{
-        json[j] = res[i];
-        j++;
-        i++;
-      }
-    }
-
-    pthread_mutex_lock(&sensores_lock);
-    fpw = fopen(nombre,"w");
-    if(fpw == NULL){
-      printf("Hubo un error al abrir el archivo\n");
-      pthread_mutex_unlock(&sensores_lock);
-      return -1;
-    }
-    else
-      fputs(json,fpw);
-
-    pthread_mutex_unlock(&sensores_lock);
-    fclose(fpw);
-    fclose(fp);
-    return 1;
-}
 
 /******************************************************************
 * @brief: Rutina que se encargará de leer los datos del 
@@ -126,50 +27,90 @@ int leer_medidas(int no_nodo, struct datos_recibidos *datos){
   pthread_mutex_lock(&sensores_lock);
 
   fp = fopen(nombre,"r");
-    if(fp == NULL)
-      printf("Hubo un error al abrir el archivo\n");
-    else{
-      while(c != EOF){
-        c = getc(fp);
-        if(c == '{')
-            i=0;
-        if(c!=' ' && c!='\n' && c!='\t'){
-            buff[i]=c;
-            i++;
-        }
-        if(c == '}'){
-            break;
-        }
+  if(fp == NULL)
+    printf("Hubo un error al abrir el archivo\n");
+  else{
+    while(c != EOF){
+      c = getc(fp);
+      if(c == '{')
+        i=0;
+      if(c!=' ' && c!='\n' && c!='\t'){
+        buff[i]=c;
+        i++;
       }
-      buff[i] = '\0';
-      len = i;
-      // printf("%s ** %d\n",buff,len);
-      pthread_mutex_unlock(&sensores_lock);
-
-      n = mjson_get_number(buff,len,"$.hum", &hum);
-      if (n<0){
-          fclose(fp);    
-          return -1;
-      }else{
-        datos->medicion_hum = (float)hum;
-      }
-      n = mjson_get_number(buff,len,"$.gas", &gas);
-      if (n<0){
-          fclose(fp);    
-          return -1;
-      }else{
-        datos->medicion_gas = (float)gas;
-      }
-      n = mjson_get_number(buff,len,"$.temp", &temp);
-      if (n<0){
-          fclose(fp);    
-          return -1;
-      }else{
-        datos->medicion_temp = (float)temp;
+      if(c == '}'){
+        break;
       }
     }
+    buff[i] = '\0';
+    len = i;
+    // printf("%s ** %d\n",buff,len);
+    pthread_mutex_unlock(&sensores_lock);
+
+    n = mjson_get_number(buff,len,"$.hum", &hum);
+    if (n<0){
+      fclose(fp);    
+      return -1;
+    }else{
+      datos->medicion_hum = (float)hum;
+    }
+    n = mjson_get_number(buff,len,"$.gas", &gas);
+    if (n<0){
+      fclose(fp);    
+      return -1;
+    }else{
+      datos->medicion_gas = (float)gas;
+    }
+    n = mjson_get_number(buff,len,"$.temp", &temp);
+    if (n<0){
+      fclose(fp);    
+      return -1;
+    }else{
+      datos->medicion_temp = (float)temp;
+    }
+  }
     
-    fclose(fp);
+  fclose(fp);
+  return 1;
+}
+
+/******************************************************************
+* @brief: Rutina que se encargará de escribir los datos en el 
+* repositorio
+* @param: Número de nodo sensor, estructura con los datos recibidos
+* previamente desempaquetados y id del sensor al que se escribirá
+* el valor                                                
+* @return: 1 si se escribió correctamente, 0 si no												
+******************************************************************/
+int escribir_medidas(int no_nodo,struct datos_recibidos dr,int id_sensor){
+    struct datos_recibidos r;
+    char buffer[100], nombre[30];
+    int fd;
+    memset(buffer, 0, 100);
+    leer_medidas( no_nodo, &r );
+
+    switch( id_sensor ){
+      case 0:
+        r.medicion_temp = dr.medicion_temp;
+      break;
+      case 1:
+        r.medicion_hum = dr.medicion_hum;
+      break;
+      case 2:
+        r.medicion_gas = dr.medicion_gas;
+      break;
+    }
+
+    sprintf(buffer,"{\n\t\"temp\":%.2f,\n\t\"hum\":%.2f,\n\t\"gas\":%.2f\n}", r.medicion_temp, r.medicion_hum, r.medicion_gas);
+    sprintf(nombre,"nodo%d.json",no_nodo);
+    fd = open(nombre, O_WRONLY|O_TRUNC|O_CREAT, 0666);
+    if( fd == -1 ){
+      printf("Hubo un error al abrir el archivo\n");
+      return 0;
+    }
+    write( fd, buffer, strlen(buffer) );
+    close(fd);
+
     return 1;
 }
 
@@ -183,6 +124,8 @@ int leer_medidas(int no_nodo, struct datos_recibidos *datos){
 void procesar_cadena(unsigned char *str,struct datos_recibidos *dr){
   int id_nodo,medida;
   short int id_sensor;
+  struct datos_recibidos recuperar;
+  float vo_cas, vo_sensor, humedad, temperatura;
 
   id_nodo = str[0];
   id_nodo = id_nodo << 8;
@@ -194,30 +137,33 @@ void procesar_cadena(unsigned char *str,struct datos_recibidos *dr){
   medida = medida << 8;
   medida = medida | str[4];
 
-  /*ID_SENSOR: 1 = TEMPERATURA*/
-  /*ID_SENSOR: 2 = HUMEDAD*/
-  /*ID_SENSOR: 3 = GAS*/
+  /*ID_SENSOR: 0 = TEMPERATURA*/
+  /*ID_SENSOR: 1 = HUMEDAD*/
+  /*ID_SENSOR: 2 = GAS*/
 
   LOG(LL_INFO,("ID_NODO: %d",id_nodo));
   LOG(LL_INFO,("ID_SENSOR: %d",id_sensor));
 
-  switch (id_sensor)
-  {
-  case 1:
-    dr->medicion_temp = 175.0 * ( ( (float)medida)/65535.0 ) - 45.0;
-    LOG(LL_INFO,("MEDIDA: %.2f",dr->medicion_temp));
-    break;
-  case 2:
-    dr->medicion_hum = 100.0 * ( ( (float)medida)/65535.0 );
-    LOG(LL_INFO,("MEDIDA: %.2f",dr->medicion_hum));
-    break;
-  case 3:
-    dr->medicion_gas = 100.0 * ( ( (float)medida)/65535.0 );
-    LOG(LL_INFO,("MEDIDA: %.2f",dr->medicion_gas));
-  default:
-    break;
+  switch (id_sensor){
+    case 0:
+      dr->medicion_temp = 175.0 * ( ( (float)medida)/65535.0 ) - 45.0;
+      LOG(LL_INFO,("MEDIDA: %.2f",dr->medicion_temp));
+      break;
+    case 1:
+      dr->medicion_hum = 100.0 * ( ( (float)medida)/65535.0 );
+      LOG(LL_INFO,("MEDIDA: %.2f",dr->medicion_hum));
+      break;
+    case 2:
+      vo_cas = (float)medida * (3.3/4096.0);
+      vo_sensor = vo_cas / 8.0;
+      leer_medidas( id_nodo, &recuperar );
+      humedad = recuperar.medicion_hum;
+      temperatura = recuperar.medicion_temp;
+      dr->medicion_gas = vo_sensor / ( ( (2/45)*humedad + (1/20)*temperatura + 25.3 ) * 0.001 ); 
+      LOG(LL_INFO,("MEDIDA: %.2f",dr->medicion_gas));
+    default:
+      break;
   }
-
   escribir_medidas(id_nodo,*dr,id_sensor);
 }
 

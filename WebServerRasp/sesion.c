@@ -46,7 +46,7 @@ int agregar_sesion(char *usuario,struct datos_sesion *sesion){
             i+=1;
             if((int)c == -1){
                 if(flag > 0){
-                    fprintf(fpr,"[\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el);
+                    fprintf(fpr,"[\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%llu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el);
                     break;
                 }
                 flag++;
@@ -54,17 +54,17 @@ int agregar_sesion(char *usuario,struct datos_sesion *sesion){
             if(c == '['){        
                 LOG(LL_INFO,("Tamaño de i: %d",i));
                 if(i<105)
-                    fprintf(fpr,"\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el);
+                    fprintf(fpr,"\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%llu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el);
                 else
-                    fprintf(fpr,"\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n",id,*(uint64_t *) dig,usuario,creado_el);
+                    fprintf(fpr,"\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%llu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n",id,*(uint64_t *) dig,usuario,creado_el);
                 break;
             }    
             if(c == '}'){
                 LOG(LL_INFO,("Tamaño de i: %d",i));
                 if(i<105)                
-                    fprintf(fpr,"\n\t,{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el);
+                    fprintf(fpr,"\n\t,{\n\t\"id\":\"%d\",\n\t\"sha\":\"%llu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el);
                 else
-                    fprintf(fpr,"\n\t,{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n",id,*(uint64_t *) dig,usuario,creado_el);
+                    fprintf(fpr,"\n\t,{\n\t\"id\":\"%d\",\n\t\"sha\":\"%llu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n",id,*(uint64_t *) dig,usuario,creado_el);
                 break;
             }
         }        
@@ -284,7 +284,7 @@ int validar_sesion(int id, uint64_t sha){
     int n;
 
     sprintf(id_str,"%d",id);
-    sprintf(sha_str,"%lu",sha);
+    sprintf(sha_str,"%llu",sha);
     
     n = buscar_sesion_por_id(id,&sesion);
 
@@ -292,7 +292,7 @@ int validar_sesion(int id, uint64_t sha){
         if(sesion.sha == sha){
             return 1;
         }else{
-            LOG(LL_ERROR,("SHA no válido: %lu : %lu\n",sesion.sha,sha));
+            LOG(LL_ERROR,("SHA no válido: %llu : %llu\n",sesion.sha,sha));
             return -1;
         }
     }else{
