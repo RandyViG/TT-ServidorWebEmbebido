@@ -19,11 +19,11 @@ LEER_CMD:
     CP0.B   W1
     BRA	    Z,	    FIN
 
-    BCLR    IFS0,   #U1TXIF
-    MOV	    W1,	    U1TXREG
+    BCLR    IFS1,   #U2TXIF
+    MOV	    W1,	    U2TXREG
     NOP
 ENVIANDO:
-    BTSS    IFS0,   #U1TXIF 
+    BTSS    IFS1,   #U2TXIF 
     GOTO    ENVIANDO
     
     GOTO    LEER_CMD
@@ -36,7 +36,7 @@ FIN:
 ;******************************************************************************    
 ; @brief: ESTA RUTINA RESETEA EL SENSOR CON EL OBJETIVO DE RECALIBRALO A LOS
 ;         VALORES POR DEFECTO Y OBTENER UN ESTADO BIEN DEFINIDO PARA EMPEZAR
-;         LA RECOLECCI?N DE LOS DATOS
+;         LA RECOLECCIÓN DE LOS DATOS
 ; @params: NINGUNO
 ; @return: NINGUNO
 ;******************************************************************************

@@ -2,7 +2,7 @@
 .GLOBAL _comandoAT
 
 ;******************************************************************************    
-; @brief: ESTA RUTINA ENVIA LOS COMANDOS AT AL MODULO WIFI MEDIANTE UART1
+; @brief: ESTA RUTINA ENVIA LOS COMANDOS AT AL MODULO WIFI MEDIANTE UART2
 ; @params: NINGUNO
 ; @return: NINGUNO
 ;******************************************************************************
@@ -16,11 +16,11 @@ LEER_CMD:
     CP0.B   W1
     BRA	    Z,	    FIN
 
-    BCLR    IFS0,   #U1TXIF
-    MOV	    W1,	    U1TXREG
+    BCLR    IFS1,   #U2TXIF
+    MOV	    W1,	    U2TXREG
     NOP
 ENVIANDO:
-    BTSS    IFS0,   #U1TXIF 
+    BTSS    IFS1,   #U2TXIF 
     GOTO    ENVIANDO
     
     GOTO    LEER_CMD

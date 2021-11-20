@@ -1,22 +1,28 @@
 /********************************************************************************
- *@brief: 
- * 
+ * @brief: *ESTE PROGRAMA CONFIGURA TODOS LOS MODULOS DEL NODO SENSOR (MC101,
+ * SHT3X-Dis, Wi - Fi) PARA QUE FUNCIONEN EN CONJUNTO Y OBTENGAN LAS MUESTRAS
+ * DE GAS LP, HUMEDAD Y TEMPERATURA LA CUALES SERAN ENVIADAS AL SERVIDOR WEB
+ * EMBEBIDO CON EL FORMATO DE LA TRAMA ESTABLECIDO.
+ * NOTA:
+ *   -> MÓDULO WI - FI SE CONECTA AL MIKROBUS DOS.
+ *   -> SENSOR SHT3XDIS SE CONECTA AL MIKROBUS UNO.
+ *   -> MC101 SE CONECTA EN LA ENTRADA ANALÓGICA DOS.
  * @device: DSPIC30F4013
- * @oscillator: HS, 14.7456MHz
- *******************************************************************************/
+ * @oscillator: FRC, 7.3728MHz 
+*******************************************************************************/
 #include "p30F4013.h"
 #include "MC101.h"
 #include "SHT3xDis.h"
 #include "wifi.h"
 
 /********************************************************************************/
-/* 						BITS DE CONFIGURACI?N									*/	
+/* BITS DE CONFIGURACION							*/	
 /********************************************************************************/
 /* SE DESACTIVA EL CLOCK SWITCHING Y EL FAIL-SAFE CLOCK MONITOR (FSCM) Y SE 	*/
-/* ACTIVA EL OSCILADOR INTERNO (FAST RC) PARA TRABAJAR							*/
+/* ACTIVA EL OSCILADOR INTERNO (FAST RC) PARA TRABAJAR				*/
 /* FSCM: PERMITE AL DISPOSITIVO CONTINUAR OPERANDO AUN CUANDO OCURRA UNA FALLA 	*/
-/* EN EL OSCILADOR. CUANDO OCURRE UNA FALLA EN EL OSCILADOR SE GENERA UNA 		*/
-/* TRAMPA Y SE CAMBIA EL RELOJ AL OSCILADOR FRC  								*/
+/* EN EL OSCILADOR. CUANDO OCURRE UNA FALLA EN EL OSCILADOR SE GENERA UNA 	*/
+/* TRAMPA Y SE CAMBIA EL RELOJ AL OSCILADOR FRC  				*/
 /********************************************************************************/
 //_FOSC(CSW_FSCM_OFF & FRC); 
 #pragma config FOSFPR = FRC             
@@ -25,19 +31,19 @@
 // Clock Switching and Monitor (Sw Disabled, Mon Disabled)
 
 /********************************************************************************/
-/* SE DESACTIVA EL WATCHDOG														*/
+/* SE DESACTIVA EL WATCHDOG							*/
 /********************************************************************************/
 //_FWDT(WDT_OFF); 
 #pragma config WDT = WDT_OFF            // Watchdog Timer (Disabled)
 
 /********************************************************************************/
-/* SE ACTIVA EL POWER ON RESET (POR), BROWN OUT RESET (BOR), 					*/	
-/* POWER UP TIMER (PWRT) Y EL MASTER CLEAR (MCLR)								*/
+/* SE ACTIVA EL POWER ON RESET (POR), BROWN OUT RESET (BOR), 			*/	
+/* POWER UP TIMER (PWRT) Y EL MASTER CLEAR (MCLR)				*/
 /* POR: AL MOMENTO DE ALIMENTAR EL DSPIC OCURRE UN RESET CUANDO EL VOLTAJE DE 	*/	
-/* ALIMENTACI?N ALCANZA UN VOLTAJE DE UMBRAL (VPOR), EL CUAL ES 1.85V			*/
-/* BOR: ESTE MODULO GENERA UN RESET CUANDO EL VOLTAJE DE ALIMENTACI?N DECAE		*/
-/* POR DEBAJO DE UN CIERTO UMBRAL ESTABLECIDO (2.7V) 							*/
-/* PWRT: MANTIENE AL DSPIC EN RESET POR UN CIERTO TIEMPO ESTABLECIDO, ESTO 		*/
+/* ALIMENTACI?N ALCANZA UN VOLTAJE DE UMBRAL (VPOR), EL CUAL ES 1.85V		*/
+/* BOR: ESTE MODULO GENERA UN RESET CUANDO EL VOLTAJE DE ALIMENTACI?N DECAE	*/
+/* POR DEBAJO DE UN CIERTO UMBRAL ESTABLECIDO (2.7V) 				*/
+/* PWRT: MANTIENE AL DSPIC EN RESET POR UN CIERTO TIEMPO ESTABLECIDO, ESTO 	*/
 /* AYUDA A ASEGURAR QUE EL VOLTAJE DE ALIMENTACI?N SE HA ESTABILIZADO (16ms) 	*/
 /********************************************************************************/
 //_FBORPOR( PBOR_ON & BORV27 & PWRT_16 & MCLR_EN ); 
@@ -48,7 +54,7 @@
 #pragma config MCLRE  = MCLR_EN          // Master Clear Enable (Enabled)
 
 /********************************************************************************/
-/*SE DESACTIVA EL C?DIGO DE PROTECCI?N											*/
+/*SE DESACTIVA EL C?DIGO DE PROTECCI?N						*/
 /********************************************************************************/
 //_FGS(CODE_PROT_OFF);      
 // FGS
@@ -56,33 +62,33 @@
 #pragma config GCP = CODE_PROT_OFF // General Segment Code Protection (Disabled)
 
 /********************************************************************************/
-/* SECCI?N DE DECLARACI?N DE CONSTANTES CON DEFINE								*/
+/* SECCI?N DE DECLARACION DE CONSTANTES CON DEFINE				*/
 /********************************************************************************/
 #define EVER 1
 #define MUESTRAS 64
 
 /********************************************************************************/
-/* DECLARACIONES GLOBALES														*/
+/* DECLARACIONES GLOBALES							*/
 /********************************************************************************/
-/*DECLARACI?N DE LA ISR DEL TIMER 1 USANDO __attribute__						*/
+/*DECLARACI?N DE LA ISR DEL TIMER 1 USANDO __attribute__			*/
 /********************************************************************************/
 void __attribute__((__interrupt__)) _T1Interrupt( void );
 
 /********************************************************************************/
-/* CONSTANTES ALMACENADAS EN EL ESPACIO DE LA MEMORIA DE PROGRAMA				*/
+/* CONSTANTES ALMACENADAS EN EL ESPACIO DE LA MEMORIA DE PROGRAMA		*/
 /********************************************************************************/
 int ps_coeff __attribute__ ((aligned (2), space(prog)));
 /********************************************************************************/
-/* VARIABLES NO INICIALIZADAS EN EL ESPACIO X DE LA MEMORIA DE DATOS			*/
+/* VARIABLES NO INICIALIZADAS EN EL ESPACIO X DE LA MEMORIA DE DATOS		*/
 /********************************************************************************/
 int x_input[MUESTRAS] __attribute__ ((space(xmemory)));
 /********************************************************************************/
-/* VARIABLES NO INICIALIZADAS EN EL ESPACIO Y DE LA MEMORIA DE DATOS			*/
+/* VARIABLES NO INICIALIZADAS EN EL ESPACIO Y DE LA MEMORIA DE DATOS		*/
 /********************************************************************************/
 int y_input[MUESTRAS] __attribute__ ((space(ymemory)));
 /********************************************************************************/
 /* VARIABLES NO INICIALIZADAS LA MEMORIA DE DATOS CERCANA (NEAR), LOCALIZADA	*/
-/* EN LOS PRIMEROS 8KB DE RAM													*/
+/* EN LOS PRIMEROS 8KB DE RAM							*/
 /********************************************************************************/
 int var1 __attribute__ ((near));
 
@@ -116,10 +122,21 @@ void iniciar_perifericos( void );
 void iniciar_interrupciones( void );
 void habilitar_modulos( void );
 
-short int bandera = 0, humedad = 0, temperatura = 0, gasLP = 0;
+/********************************************************************************/
+/* DECLARACION DE VARIABLES                                                     */
+/********************************************************************************/
+unsigned short int humedad = 0, temperatura = 0, gasLP = 0, bandera = 0; 
+unsigned short int idNodo;
+unsigned char idHumedad, idTemperatura, idGasLP;
 
 int main( void ){
+    int i;
     unsigned char estado;
+    
+    idNodo = 0;
+    idTemperatura = 0;
+    idHumedad = 1;
+    idGasLP = 2;
     
     iniciar_perifericos();
     iniciar_uart();
@@ -135,17 +152,55 @@ int main( void ){
     iniciar_wifi();
     configurar_wifi();
     
-    configurar_sensor(); //SHT3xDis
+    iniciar_interrupciones();
+    habilitar_modulos();
+    
+    for( i = 0; i < 50 ; i++ ){
+        configurar_sensor();
+        realizar_lectura();
+    }
         
     for( ; EVER ; ){
         if( bandera ){
+            estado = configurar_sensor(); //SHT3xDis
+            if( estado )
+              continue;
             estado = realizar_lectura();
             if( estado )
-                continue;
+               continue;
             retardo_1S();
+            enviar_wifi();
             retardo_1S();
-            enviar_wifi(); //Enviar trama
+            U2TXREG = (idNodo & 0xFF00)>>8;
+            U2TXREG = idNodo & 0x00FF;
+            U2TXREG = idTemperatura;
+            U2TXREG = (temperatura & 0xFF00)>>8;
+            U2TXREG = temperatura & 0x00FF;
+            retardo_1S();
             cerrar_conexion();
+            
+            enviar_wifi();
+            retardo_1S();
+            U2TXREG = (idNodo & 0xFF00)>>8;
+            U2TXREG = idNodo & 0x00FF;
+            U2TXREG = idHumedad;
+            U2TXREG = (humedad & 0xFF00)>>8;
+            U2TXREG = humedad & 0x00FF;
+            retardo_1S();
+            cerrar_conexion();
+            
+            enviar_wifi();
+            retardo_1S();
+            U2TXREG = (idNodo & 0xFF00)>>8;
+            U2TXREG = idNodo & 0x00FF;
+            U2TXREG = idGasLP;
+            U2TXREG = (gasLP & 0xFF00)>>8;
+            U2TXREG = gasLP & 0x00FF;
+            retardo_1S();
+            cerrar_conexion();
+            
+            bandera = 0;
+            retardo_1S();
         }
         asm("nop");   
     }
@@ -157,17 +212,11 @@ int main( void ){
 /* @brief: ESTA FUNCI?N INICIALIZA LOS PERIFERICOS DEL MICROCONTROLADOR     */
 /*         NECESARIOS PARA LA COMUNICACI?N CON EL SENSOR MEDIANTE UART1,    */
 /*         PARA LA COMUNICACI?N MEDIANTE UART2 Y PARA EL ENVIO DE LAS       */
-/*         SE?ALES DE RESET Y ENABLE AL MODULO                              */
+/*         SEÑALES DE RESET Y ENABLE AL MODULO                              */
 /* @params: NINGUNO                                                         */
-/* @return: NINGUNO															*/
+/* @return: NINGUNO							    */
 /****************************************************************************/
 void iniciar_perifericos( void ){
-    PORTA = 0;
-    asm("nop");
-    LATA = 0;
-    asm("nop");
-    TRISA = 0;
-    asm("nop");
     
     //ADC
     PORTB = 0;
@@ -176,6 +225,7 @@ void iniciar_perifericos( void ){
     asm("nop");
     TRISB = 0;
     asm("nop");
+    
     // Entrada Analogica AN2
     TRISBbits.TRISB2 = 1;
     asm("nop");
@@ -187,7 +237,7 @@ void iniciar_perifericos( void ){
     TRISD = 0;
     asm("nop");
     
-    // UARTs
+    // UART
     PORTF = 0;
     asm("nop");
     LATF = 0;
@@ -195,10 +245,10 @@ void iniciar_perifericos( void ){
     TRISF = 0;
     asm("nop");
     
-    //UART1
-    TRISFbits.TRISF2 = 1;   //U1RX-RF2
+    //UART1 - Alterno
+    TRISCbits.TRISC14 = 1;   //UA1RX-RF2
     asm("nop");
-    TRISFbits.TRISF3 = 0;   //U1TX-RF3
+    TRISCbits.TRISC13 = 0;   //UA1TX-RF3
     asm("nop");
     
     // UART2
@@ -208,12 +258,19 @@ void iniciar_perifericos( void ){
     asm("nop");
     
     //CS - ENABLE PARA EL WIFI
-    TRISAbits.TRISA11 = 0;
+    TRISBbits.TRISB8 = 0;
     asm("nop");
     
     //RESET PARA EL WIFI
+    TRISDbits.TRISD1 = 0;
+    asm("nop");
+    
+    //RESET SHT3x-DIS
     TRISDbits.TRISD0 = 0;
-    asm("nop");    
+    asm("nop");
+    //TIMER
+    TRISDbits.TRISD3 = 0;
+    asm("nop");
 }
 
 void iniciar_interrupciones( void ){
@@ -223,16 +280,17 @@ void iniciar_interrupciones( void ){
     // Timer3
     IFS0bits.T3IF = 0;
     IEC0bits.T3IE = 1;
-    // UART1-Rx
-    IFS0bits.U1RXIF = 0;
-    IEC0bits.U1RXIE = 1;
+    // UART2-Rx
+    IFS1bits.U2RXIF = 0;
+    IEC1bits.U2RXIE = 1;
 }
 
 void habilitar_modulos( void ){
     T3CONbits.TON = 1;     //Encendiendo TIMER3
     ADCON1bits.ADON = 1;   //Encendiendo ADC
+    U1MODEbits.UARTEN = 1; //Encendiendo UART1
+    U1STAbits.UTXEN = 1;   //Habilitando transmisions
     U2MODEbits.UARTEN = 1; //Encendiendo UART2
     U2STAbits.UTXEN = 1;   //Habilitando transmision
-    U1MODEbits.UARTEN = 1; //Encendiendo UART1
-    U1STAbits.UTXEN   = 1; //Habilitando transmisions
+    I2CCONbits.I2CEN = 1;  //Habilitando I2C
 }
