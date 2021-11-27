@@ -31,10 +31,20 @@ fetch(url, {
             sensores = JSON.parse(datos)
 
             if(datos !== '{}'){
+                console.log(sensores["bandera"]);
+                if(sensores["bandera"] > 0){
+                    swal({
+                        title: "Urgente!",
+                        text: "Se detecto un valor anormal en el nivel de gas LP",
+                        icon: "warning",
+                        dangerMode: true,
+                      })
+                }
+
                 graph_data["temp"] = sensores["temp"];
                 graph_data["hum"] = sensores["hum"];
                 graph_data["gas"] = sensores["gas"];
-
+                  
                 lblTemp.textContent = `${sensores["temp"]} °C`;
                 lblHum.textContent = `${sensores["hum"]} %RH`;
                 lblGas.textContent = `${sensores["gas"]} %LEL`;

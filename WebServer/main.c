@@ -32,7 +32,7 @@ int main( int argc, char *argv[] ){
     struct mg_connection *c;
     pthread_t tid_servidor_tcp;
 
-    sprintf(direccion,"%s:%d",s_direccion_escucha,s_puerto_escucha);
+    sprintf(direccion,"https://%s:%d",s_direccion_escucha,s_puerto_escucha);
 
     if (pthread_mutex_init(&sensores_lock, NULL) != 0){
         printf("Inicialización del mutex para sensores ha fallado!\n");

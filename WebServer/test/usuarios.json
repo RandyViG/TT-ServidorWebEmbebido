@@ -1,0 +1,23 @@
+[
+    {
+    "user": "admin",
+    "password":"admin",
+    "email": "infosweb053@gmail.com",
+    "nodo": 0,
+    "admin": 1
+    }
+    ,{
+	"user":"root",
+	"password":"asd",
+	"email":"infosweb053@gmail.com",
+	"nodo":1,
+	"admin":1
+	}
+	,{
+	"user":"zabdiel",
+	"password":"asd",
+	"email":"infosweb053@gmail.com",
+	"nodo":1,
+	"admin":0
+	}
+]

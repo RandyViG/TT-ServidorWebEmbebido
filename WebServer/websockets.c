@@ -7,11 +7,6 @@
 #include "estructuras.h"
 #include "procesamiento.h"
 
-struct args_ws_thread{
-    struct mg_mgr mgr;
-    int puerto;
-};
-
 int generar_puerto(){
     int puerto;
     srand(time(NULL)*clock());
@@ -20,6 +15,13 @@ int generar_puerto(){
 }
 
 void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
+  if (ev == MG_EV_ACCEPT) {
+    struct mg_tls_opts opts = {
+      .cert = "ws_cert.pem",    // Certificate file
+      .certkey = "ws_key.pem",  // Private key file
+    };
+    mg_tls_init(c, &opts);
+  }
   if (ev == MG_EV_HTTP_MSG) {
     struct mg_http_message *hm = (struct mg_http_message *) ev_data;
     mg_ws_upgrade(c, hm, NULL);  // Upgrade HTTP to WS
@@ -58,7 +60,7 @@ void *lanzar_servidor_ws(void *args){
 
     sprintf(direccion,"%s:%d",s_direccion_escucha,puerto);      
     // sprintf(direccion,"%s:%d","http://localhost",puerto);
-    mg_http_listen(&mgr, direccion, fn, &mgr);
+    mg_http_listen(&mgr, direccion, fn, NULL);
     for (;;) mg_mgr_poll(&mgr, 1000);
 
     pthread_exit(NULL);
@@ -88,9 +90,10 @@ void *iniciar_ws(void *args){
 //Crear ws
 void crear_ws(int puerto){
     pthread_t tid;
-    int p = puerto;
-    
-    pthread_create(&tid,NULL,iniciar_ws,&p);
+    int *ptr = (int*) malloc(sizeof(int));
+    *ptr = puerto;
+
+    pthread_create(&tid,NULL,iniciar_ws,ptr);
     // pthread_join(tid,NULL);
     // printf("Terminando WS!");
 }

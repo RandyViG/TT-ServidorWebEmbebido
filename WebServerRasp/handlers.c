@@ -34,7 +34,7 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
     if( ev == MG_EV_HTTP_MSG ){
         struct mg_http_message *hm = (struct mg_http_message *) datos_ev;
         struct mg_http_serve_opts opts = {.mime_types = "text/html",.extra_headers = "Access-Control-Allow-Origin: *\r\n"};
-        LOG(LL_INFO,("Evento recibido en el servidor HTTP"));                      
+        LOG(LL_INFO,("Evento recibido en el servidor HTTP"));
 
         if( mg_http_match_uri( hm, "/hi" ) ){
             char name[100];
@@ -104,6 +104,32 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
             }
 
         }
+        else if(mg_http_match_uri( hm, "/configuracion" )){
+            struct mg_str *s = mg_http_get_header(hm, "Cookie");
+            struct datos_sesion sesion;
+            int id,admin,len;
+
+            if(s != NULL){
+                char head_buff[s->len + 2];
+                strncpy(head_buff,s->ptr,s->len);
+
+                id = buscar_id_sesion(head_buff,s->len);
+                if(buscar_sesion_por_id(id,&sesion) > 0){
+                    len = str_len(sesion.usuario);
+                    admin = verificar_administrador(sesion.usuario, len);
+                    // printf("ID: %d, NOM: %s ,ADM: %d",id,sesion.usuario,admin);
+                    if(admin == 1){
+                        mg_http_serve_file( c, hm, "./public/admin.html",&opts);
+                    }else if(admin == 0){
+                        mg_http_serve_file( c, hm, "./public/form_user.html",&opts);
+                    }else{
+                        LOG(LL_ERROR,("Sesión no válida"));
+                    }
+                }else{
+                    LOG(LL_ERROR,("Sesión no encontrada"));
+                }
+            }
+        }
         else if( mg_http_match_uri( hm, "/logout" ) ){
             /*Se eliminan los datos de sesión del cliente*/
             struct mg_str *s = mg_http_get_header(hm, "Cookie");
@@ -125,18 +151,128 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
         else if(mg_http_match_uri( hm, "/datos_sensor" )){
             // Crear el ws
             int puerto = generar_puerto();
-            printf("S: %d",puerto);
+            //printf("S: %d",puerto);
             mg_http_reply( c, 200, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"port\":%d,\"result\": %d}", puerto,200);
             crear_ws(puerto);
         }
-        else if( mg_http_match_uri( hm, "/form" ) )
-            mg_http_serve_file( c, hm, "./public/form_user.html",&opts);
+        else if( mg_http_match_uri( hm, "/datos_usuarios" ) ){
+            size_t file_size;
+            char* data = mg_file_read("usuarios.json", &file_size);
+            if (data != NULL) {
+                mg_http_reply(c, 200, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "%s",data);
+            }else{
+                mg_http_reply( c, 400, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",400);
+            }
+            free(data);
+        }
+        else if( mg_http_match_uri( hm, "/edit_usuario" ) ){
+            struct datos_sesion sesion;
+            double session;
+            int id,len,admin,n1,n2,n3,e;
+            char nUsr[50],nPsw[50],email[60];
+            mjson_get_number(hm->body.ptr,hm->body.len,"$.session",&session);
+            id=(int)session;
+
+            if(buscar_sesion_por_id(id,&sesion) > 0){
+                    len = str_len(sesion.usuario);
+                    admin = verificar_administrador(sesion.usuario, len);
+                    // LOG(LL_INFO,("ID: %d, NOM: %s ,ADM: %d",id,sesion.usuario,admin));
+                    if(admin == 1){
+                        //HACER PARA ADMINISTRADOR
+                        int n4,n5,nodo;
+                        double aux_nodo;
+                        char target[50];
+
+                        n1 = mjson_get_string(hm->body.ptr,hm->body.len,"$.usr",nUsr,sizeof(nUsr));
+                        n2 = mjson_get_string(hm->body.ptr,hm->body.len,"$.psw",nPsw,sizeof(nPsw));
+                        n3 = mjson_get_string(hm->body.ptr,hm->body.len,"$.target",target,sizeof(target));
+                        n4 = mjson_get_string(hm->body.ptr,hm->body.len,"$.email",email,sizeof(email));
+                        n5 = mjson_get_number(hm->body.ptr,hm->body.len,"$.nodo",&aux_nodo);
+
+                        nodo = (int)aux_nodo;
+                        LOG(LL_INFO,("CAMBIAR %s A %s CON PSW %s EMAIL %s Y EN NODO %d",target,nUsr,nPsw,email,nodo));
+                        if(n1 >= 0 && n2 > 0 && n3 > 0 && n4 >= 0 && n5 > 0){
+                            e = actualizar_usuario_admin(target,nUsr,nPsw,email,nodo);
+                            if(e>0){
+                                mg_http_reply( c, 200, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",200);
+                            }else{
+                                LOG(LL_ERROR,("Error al actualizar usuario"));
+                                mg_http_reply( c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",500);
+                            }
+                        }
+
+                        mg_http_reply( c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",500);
+
+                    }else if(admin == 0){
+                        //HACER PARA NO ADMINISTRADOR
+                        n1 = mjson_get_string(hm->body.ptr,hm->body.len,"$.usr",nUsr,sizeof(nUsr));
+                        n2 = mjson_get_string(hm->body.ptr,hm->body.len,"$.psw",nPsw,sizeof(nPsw));
+                        n3 = mjson_get_string(hm->body.ptr,hm->body.len,"$.email",nPsw,sizeof(nPsw));
+                        if(n1 > 0 && n2 > 0 && n3 > 0){
+                            e = actualizar_usuario_admin(sesion.usuario,nUsr,nPsw,email,0);
+                            if(e>0){
+                                mg_http_reply( c, 200, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",200);
+                            }else{
+                                LOG(LL_ERROR,("Error al actualizar usuario"));
+                                mg_http_reply( c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",500);
+                            }
+                        }
+                    }else{
+                        LOG(LL_ERROR,("Sesión no válida"));
+                        mg_http_reply( c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",500);
+
+                    }
+                }else{
+                    LOG(LL_ERROR,("Sesión no encontrada"));
+                    mg_http_reply( c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",500);
+                }           
+        }
+        else if( mg_http_match_uri( hm, "/eliminar_usuario" ) ){
+            char user[50];
+            if( mg_http_get_var( &hm->query, "user", user, 100 ) > 0 ){
+                user[hm->query.len + 1]='\0';
+                printf("Eliminar usuario %s",user);
+                if(eliminar_usuario(user) > 0){
+                    LOG(LL_INFO,("Usuario %s eliminado!",user));
+                    mg_http_serve_file( c, hm, "./public/index.html",&opts);
+                }else{
+                    LOG(LL_INFO,("Error al eliminar al usuario %s!",user));
+
+                }
+            }                
+        }
+        else if( mg_http_match_uri( hm, "/agregar_usuario" ) ){
+            int n1,n2,n3,n4,e;
+            double aux_nodo;
+            char nUsr[50],nPsw[50],email[60];
+
+            n1 = mjson_get_string(hm->body.ptr,hm->body.len,"$.usr",nUsr,sizeof(nUsr));
+            n2 = mjson_get_string(hm->body.ptr,hm->body.len,"$.psw",nPsw,sizeof(nPsw));
+            n4 = mjson_get_string(hm->body.ptr,hm->body.len,"$.email",email,sizeof(email));
+            n3 = mjson_get_number(hm->body.ptr,hm->body.len,"$.nodo",&aux_nodo);
+
+            if(n1 > 0 && n2 > 0 && n3 > 0 && n4 > 0){
+                LOG(LL_INFO,("NUEVO USR %s CON PSW %s EMAIL %s NODO %d",nUsr,nPsw,email,(int)aux_nodo));
+                //nodo = (int)aux_nodo;
+                e = agregar_usuario(nUsr, nPsw, email, (int)aux_nodo, 0);
+                if(e>0){                
+                    mg_http_reply( c, 200, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",200);
+                }else{
+                    LOG(LL_ERROR,("Error al agregar usuario"));
+                    mg_http_reply( c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",500);            
+                }
+            }else{
+                mg_http_reply( c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",500);            
+            }
+        }
+        else if( mg_http_match_uri( hm, "/form_admin" ) )
+            mg_http_serve_file( c, hm, "./public/data-admin.html",&opts);
 
         else if( mg_http_match_uri( hm, "/admin" ) )
             mg_http_serve_file( c, hm, "./public/admin.html",&opts);
 
-        else if( mg_http_match_uri( hm, "/form-admin" ) )
-            mg_http_serve_file( c, hm, "./public/data-admin.html",&opts);
+        else if( mg_http_match_uri( hm, "/form" ) )
+            mg_http_serve_file( c, hm, "./public/form-user.html",&opts);
 
         else if( mg_http_match_uri( hm, "/alert" ) )
             mg_http_serve_file( c, hm, "./public/indexAlert.html",&opts);

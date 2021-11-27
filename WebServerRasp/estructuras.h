@@ -1,7 +1,7 @@
 #include "mongoose.h"
 
 /*Dirección IP y puerto donde se alojará el servidor web*/
-#define s_direccion_escucha "http://192.168.0.210"
+#define s_direccion_escucha "http://127.0.0.1"
 #define s_puerto_escucha 8000
 
 /******************************************************************
@@ -23,11 +23,13 @@ struct datos_recibidos{
 * @param: NINGUNO                                                      
 * @return: NINGUNO														
 ******************************************************************/
-struct datos_usuario{
+struct datos_usuario
+{
     char *nombre;
     char *password;
     char *email;
-    int nodo;
+    short int nodo;
+    short int admin;
 };
 
 /******************************************************************

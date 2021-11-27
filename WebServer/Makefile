@@ -2,8 +2,8 @@ PROYECTO=server
 OBJECTS:=$(patsubst %.c,%.o,$(wildcard *.c))
 DESTDIR=/usr/local/bin
 CFLAGS=-Wall
-OPTIONS=-DMG_ENABLE_DIRECTORY_LISTING=1
-LFLAGS=-lm -lpthread
+OPTIONS=-DMG_ENABLE_DIRECTORY_LISTING=1 -DMG_ENABLE_OPENSSL=1 -I$(/usr/bin/openssl)/include
+LFLAGS=-lm -lpthread -lssl -lcrypto
 CC=gcc
 
 all: $(PROYECTO)

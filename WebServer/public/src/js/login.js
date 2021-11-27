@@ -8,7 +8,7 @@ errorMsg = document.getElementById("error-msg");
 
 function logSubmit(event) {
     event.preventDefault();
-    var url = `http://127.0.0.1:8000/login_data`
+    var url = `https://192.168.15.12:8000/login_data`
     var data = `{"usr":"${usrForm.value}","psw":"${pswForm.value}"}`
     
     fetch(url, {

@@ -20,15 +20,17 @@ int leer_medidas(int no_nodo, struct datos_recibidos *datos){
   FILE *fp;
   int i,len,n;
   char c='x',nombre[30],buff[300];
-  double hum,gas,temp;
+  double hum,gas,temp,bandera;
 
   sprintf(nombre,"nodo%d.json",no_nodo);
   
   pthread_mutex_lock(&sensores_lock);
 
   fp = fopen(nombre,"r");
-  if(fp == NULL)
+  if(fp == NULL){
     printf("Hubo un error al abrir el archivo\n");
+    return -1;
+  }
   else{
     while(c != EOF){
       c = getc(fp);
@@ -44,7 +46,7 @@ int leer_medidas(int no_nodo, struct datos_recibidos *datos){
     }
     buff[i] = '\0';
     len = i;
-    // printf("%s ** %d\n",buff,len);
+    printf("WS: %s ** %d\n",buff,len);
     pthread_mutex_unlock(&sensores_lock);
 
     n = mjson_get_number(buff,len,"$.hum", &hum);
@@ -67,6 +69,13 @@ int leer_medidas(int no_nodo, struct datos_recibidos *datos){
       return -1;
     }else{
       datos->medicion_temp = (float)temp;
+    }
+    n = mjson_get_number(buff,len,"$.flag",&bandera);
+    if (n<0){
+      fclose(fp);    
+      return -1;
+    }else{
+      datos->bandera_alerta = (int)bandera;
     }
   }
     
@@ -106,7 +115,7 @@ int escribir_medidas(int no_nodo,struct datos_recibidos dr,int id_sensor){
     fd = open(nombre, O_WRONLY|O_TRUNC|O_CREAT, 0666);
     if( fd == -1 ){
       printf("Hubo un error al abrir el archivo\n");
-      return 0;
+      return -1;
     }
     write( fd, buffer, strlen(buffer) );
     close(fd);

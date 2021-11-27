@@ -79,7 +79,7 @@ void *servidor_tcp(void *args){
     
     LOG(LL_INFO, ("Iniciando Servidor TCP"));
                                
-    mg_listen(mgr, "tcp://192.168.0.210:6000", manejador_tcp, mgr);
+    mg_listen(mgr, "tcp://127.0.0.1:6000", manejador_tcp, mgr);
     for (;;) mg_mgr_poll(mgr, 1000);
     
     LOG(LL_INFO,("TERMINANDO SERVIDOR TCP"));
