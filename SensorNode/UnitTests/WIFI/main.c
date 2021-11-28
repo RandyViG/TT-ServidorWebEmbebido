@@ -173,17 +173,10 @@ int main (void){
 }
 
 /****************************************************************************/
-<<<<<<< HEAD
 /* @brief: ESTA FUNCIï¿½N INICIALIZA LOS PERIFERICOS DEL MICROCONTROLADOR     */
 /*         NECESARIOS PARA LA COMUNICACIï¿½N CON EL SENSOR MEDIANTE UART1,    */
 /*         PARA LA COMUNICACIï¿½N MEDIANTE UART2 Y PARA EL ENVIO DE LAS       */
 /*         SEï¿½ALES DE RESET Y ENABLE AL MODULO                              */
-=======
-/* @brief: ESTA FUNCIÓN INICIALIZA LOS PERIFERICOS DEL MICROCONTROLADOR     */
-/*         NECESARIOS PARA LA COMUNICACIÓN CON EL MODULO WIFI ESP8266,      */
-/*         MEDIANTE UART2 Y PARA EL ENVIO DE LAS SEÑALES DE RESET Y         */
-/*         ENABLE AL MODULO                                                 */
->>>>>>> c52154b (Cambiando Wifi a UART2)
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO							    */
 /****************************************************************************/
@@ -236,13 +229,8 @@ void iniciar_puertos( void ){
 }
 
 /****************************************************************************/
-<<<<<<< HEAD
-/* @brief: ESTA FUNCIï¿½N CONFIGURA EL UART1 Y UART2 CON LA VELOCIDAD DE      */
-/*         115200 BAUDIOS                                                   */
-=======
-/* @brief: ESTA FUNCIÓN CONFIGURA EL UART1 ALTERNO Y UART2 CON LA           */
+/* @brief: ESTA FUNCIï¿½N CONFIGURA EL UART1 ALTERNO Y UART2 CON LA           */
 /*         VELOCIDAD DE 115200 BAUDIOS                                      */
->>>>>>> c52154b (Cambiando Wifi a UART2)
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO							    */
 /****************************************************************************/
