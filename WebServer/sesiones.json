@@ -23,4 +23,14 @@
 	"usuario":"admin",
 	"creacion":"1638008273"
 	}
+<<<<<<< HEAD
                                                                                                    ]
+=======
+	,{
+	"id":"443896047",
+	"sha":"18316121577511673742",
+	"usuario":"admin",
+	"creacion":"1638085432"
+	}
+]
+>>>>>>> 45f6d33 (Separando direcciones ip y archivos)

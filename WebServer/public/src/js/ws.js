@@ -1,5 +1,7 @@
-var url = `https://192.168.15.12:8000/datos_sensor`;
-var data = `{${obtSessionID()}}`;
+const ip = '192.168.0.16'
+const port = 8000
+const url = `http://${ip}:${port}/datos_sensor`;
+var data = `{}`;
 
 const lblTemp = document.getElementById("temp-data");
 const lblGas = document.getElementById("gas-data");
@@ -18,8 +20,7 @@ fetch(url, {
 .then(data => {
     if(data.result === 200){
         console.log(data);
-        const socket = new WebSocket(`wss://192.168.15.12:${data.port}`);
-        console.log("Socket abierto")
+        const socket = new WebSocket(`ws://${ip}:${data.port}`);
         // Abre la conexión
         socket.addEventListener('open', function (event) {
             socket.send('Open conection!');
