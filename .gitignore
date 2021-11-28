@@ -1,0 +1,7 @@
+# Object files
+*.o
+
+# Executables
+*.exe
+*.out
+servidor_web_embebido
