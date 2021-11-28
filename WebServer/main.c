@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+#include "demonio.h"
 #include "handlers.h"
 #include "mongoose.h"
 #include "estructuras.h"
@@ -32,7 +33,9 @@ int main( int argc, char *argv[] ){
     struct mg_connection *c;
     pthread_t tid_servidor_tcp;
 
-    sprintf(direccion,"https://%s:%d",s_direccion_escucha,s_puerto_escucha);
+    iniciar_demonio();
+
+    sprintf(direccion,"%s:%d",s_direccion_escucha,s_puerto_escucha);
 
     if (pthread_mutex_init(&sensores_lock, NULL) != 0){
         printf("Inicialización del mutex para sensores ha fallado!\n");
