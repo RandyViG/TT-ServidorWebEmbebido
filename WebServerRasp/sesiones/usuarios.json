@@ -1,0 +1,14 @@
+[
+    {
+        "user": "admin",
+        "password":"admin",
+        "email": "admin@admin.com",
+        "nodo": 0
+    },
+    {
+        "user": "admin1",
+        "password":"admin1",
+        "email": "admin1@admin.com",
+        "nodo": 0
+    }
+]
