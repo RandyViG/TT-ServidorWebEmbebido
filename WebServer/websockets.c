@@ -58,7 +58,7 @@ void *lanzar_servidor_ws(void *args){
 
     printf("\nH:%d\n",puerto);
 
-    sprintf(direccion,"%s:%d",s_direccion_escucha,puerto);      
+    sprintf(direccion,"http://%s:%d",s_direccion_escucha,puerto);      
     // sprintf(direccion,"%s:%d","http://localhost",puerto);
     mg_http_listen(&mgr, direccion, fn, NULL);
     for (;;) mg_mgr_poll(&mgr, 1000);

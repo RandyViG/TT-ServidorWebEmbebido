@@ -129,9 +129,9 @@ int enviar_correo_a_usuarios_nodo(int no_nodo){
 
                 if(n1 < 0 || n2 < 0 || n3 < 0) return -1;
                 if((int)nodo == no_nodo){
-                    enviar_correo(buff_mail,buff_usr);
-                    LOG(LL_INFO,("Correo enviado a %s para el nodo %d\n",buff_mail,(int)nodo));
-                    // printf("Correo enviado a %s para el nodo %d\n",buff_mail,(int)nodo);
+                  enviar_correo(buff_mail,buff_usr);
+                  LOG(LL_INFO,("Correo enviado a %s para el nodo %d\n",buff_mail,(int)nodo));
+                  //printf("Correo enviado a %s para el nodo %d\n",buff_mail,(int)nodo);
                 }
             }                
         }
