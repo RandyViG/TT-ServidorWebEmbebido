@@ -99,9 +99,9 @@ int y_input[MUESTRAS] __attribute__ ((space(ymemory)));
 int var1 __attribute__ ((near));
 
 /********************************************************************************
- * DECLARACIÓN DE FUNCIONES
+ * DECLARACIï¿½N DE FUNCIONES
  ********************************************************************************/
-/*FUNCIONES PARA CONFIGURACIÓN*/
+/*FUNCIONES PARA CONFIGURACIï¿½N*/
 void iniciar_puertos( void );
 void iniciar_uart( void );
 void configurar_wifi( void );
@@ -121,9 +121,9 @@ void retardo_20ms(void);
 void retardo_1S(void);
 
 /********************************************************************************
- * DECLARACIÓN DE VARIABLES GLOBALES
+ * DECLARACIï¿½N DE VARIABLES GLOBALES
  ********************************************************************************/
-/*COMANDOS AT DE CONFIGURACIÓN*/
+/*COMANDOS AT DE CONFIGURACIï¿½N*/
 unsigned char cmdRST[] = "AT+RST\r\n";
 unsigned char cmdCWMODE[] = "AT+CWMODE=1\r\n";
 unsigned char cmdCIPMUX[] = "AT+CIPMUX=0\r\n";
@@ -138,12 +138,12 @@ unsigned char cmdCIPCLOSE[] = "AT+CIPCLOSE\r\n";
 unsigned char cmdSTOPPT[] = "+++";
 
 /*VARIABLES DE SENSORES*/
-unsigned short int temperatura, idNodo;
-unsigned char idTemperatura;
+short int temperatura, idNodo;
+char idTemperatura;
 
 int main (void){
     idNodo = 0;
-    idTemperatura = 1;
+    idTemperatura = 0;
     temperatura = 255;
     
     iniciar_puertos();
@@ -173,10 +173,10 @@ int main (void){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN INICIALIZA LOS PERIFERICOS DEL MICROCONTROLADOR     */
-/*         NECESARIOS PARA LA COMUNICACIÓN CON EL SENSOR MEDIANTE UART1,    */
-/*         PARA LA COMUNICACIÓN MEDIANTE UART2 Y PARA EL ENVIO DE LAS       */
-/*         SEÑALES DE RESET Y ENABLE AL MODULO                              */
+/* @brief: ESTA FUNCIï¿½N INICIALIZA LOS PERIFERICOS DEL MICROCONTROLADOR     */
+/*         NECESARIOS PARA LA COMUNICACIï¿½N CON EL SENSOR MEDIANTE UART1,    */
+/*         PARA LA COMUNICACIï¿½N MEDIANTE UART2 Y PARA EL ENVIO DE LAS       */
+/*         SEï¿½ALES DE RESET Y ENABLE AL MODULO                              */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
 /****************************************************************************/
@@ -224,7 +224,7 @@ void iniciar_puertos( void ){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN CONFIGURA EL UART1 Y UART2 CON LA VELOCIDAD DE      */
+/* @brief: ESTA FUNCIï¿½N CONFIGURA EL UART1 Y UART2 CON LA VELOCIDAD DE      */
 /*         115200 BAUDIOS                                                   */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
@@ -242,7 +242,7 @@ void iniciar_uart( void ){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN INICIALIZA LAS INTERRUPCIONES                       */
+/* @brief: ESTA FUNCIï¿½N INICIALIZA LAS INTERRUPCIONES                       */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
 /****************************************************************************/
@@ -253,7 +253,7 @@ void iniciar_interrupciones( void ){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN HABILITA UART1 Y UART2                              */
+/* @brief: ESTA FUNCIï¿½N HABILITA UART1 Y UART2                              */
 /* @params: NINGUNO                                                         */
 /* @return: NINGUNO															*/
 /****************************************************************************/
@@ -266,7 +266,7 @@ void habilitar_uart( void ){
 }
 
 /****************************************************************************/
-/* @brief: ESTA FUNCIÓN INICIALIZA EL ESP8266 COLOCANDO UN PUSLO EN SRT Y   */
+/* @brief: ESTA FUNCIï¿½N INICIALIZA EL ESP8266 COLOCANDO UN PUSLO EN SRT Y   */
 /*         HABILITANDO LA BANDERA DE ENABLE                                 */
 /*                  RST --------         --------                           */
 /*                              |       |                                   */
