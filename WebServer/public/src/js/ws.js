@@ -1,7 +1,7 @@
-const ip = '192.168.0.16'
+const ip = '192.168.15.12'
 const port = 8000
-const url = `http://${ip}:${port}/datos_sensor`;
-var data = `{}`;
+const url = `https://${ip}:${port}/datos_sensor`;
+var data = `{"sesion":${obtSessionID()}}`;
 
 const lblTemp = document.getElementById("temp-data");
 const lblGas = document.getElementById("gas-data");
@@ -20,7 +20,7 @@ fetch(url, {
 .then(data => {
     if(data.result === 200){
         console.log(data);
-        const socket = new WebSocket(`ws://${ip}:${data.port}`);
+        const socket = new WebSocket(`wss://${ip}:${data.port}`);
         // Abre la conexión
         socket.addEventListener('open', function (event) {
             socket.send('Open conection!');
@@ -73,6 +73,16 @@ function actualizar_grafo(){
     myChart.update();
     myChart2.update();
     myChart3.update();
+}
+
+function obtSessionID() {
+    let arr = document.cookie.split(';');
+    for(let atr of arr){
+        let aux = atr.split('=')
+        if(aux[0].replace(" ", "") === 'session_id'){
+            return aux[1];
+        }
+    }
 }
 
 function obtSessionID() {

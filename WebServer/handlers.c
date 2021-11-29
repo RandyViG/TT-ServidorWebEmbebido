@@ -165,10 +165,25 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
         }
         else if(mg_http_match_uri( hm, "/datos_sensor" )){
             // Crear el ws
+            struct datos_sesion sesion;
+            struct datos_usuario usuario;
+            double sesion_id;
             int puerto = generar_puerto();
+            int n1;
+
+            n1 = mjson_get_number(hm->body.ptr,hm->body.len,"$.sesion",&sesion_id);
+            if(n1>0){
+                if(buscar_sesion_por_id((int)sesion_id,&sesion) > 0){
+                    if(buscar_usuario_por_nombre(sesion.usuario,&usuario)){
+                        LOG(LL_INFO,("CREANDO WS PARA USUARIO %s CON NODO %d",sesion.usuario,usuario.nodo));
+                        mg_http_reply( c, 200, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"port\":%d,\"result\": %d}", puerto,200);
+                        crear_ws(puerto,usuario.nodo);
+                    }
+                }
+            }else{
+                mg_http_reply( c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",500);
+            }          
             //printf("S: %d",puerto);
-            mg_http_reply( c, 200, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"port\":%d,\"result\": %d}", puerto,200);
-            crear_ws(puerto);
         }
         else if( mg_http_match_uri( hm, "/datos_usuarios" ) ){
             size_t file_size;

@@ -17,8 +17,8 @@ int generar_puerto(){
 void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
   if (ev == MG_EV_ACCEPT) {
     struct mg_tls_opts opts = {
-      .cert = "ws_cert.pem",    // Certificate file
-      .certkey = "ws_key.pem",  // Private key file
+      .cert = "cert.pem",    // Certificate file
+      .certkey = "key.pem",  // Private key file
     };
     mg_tls_init(c, &opts);
   }
@@ -38,7 +38,7 @@ void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
         char strS[300];
         int len;
 
-        leer_medidas(0,&datos);
+        leer_medidas(*(int*)fn_data,&datos);
         sprintf(strS,"{\"hum\":%.2f,\"gas\":%.2f,\"temp\":%.2f}",datos.medicion_hum,datos.medicion_gas,datos.medicion_temp);
         len=str_len(strS);
         sleep(1);
@@ -53,14 +53,15 @@ void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
 
 void *lanzar_servidor_ws(void *args){
     char direccion[30];
-    struct mg_mgr mgr = ((struct args_ws_thread*)args)->mgr;;
+    struct mg_mgr mgr = ((struct args_ws_thread*)args)->mgr;
     int puerto = ((struct args_ws_thread*)args)->puerto;
+    int nodo = ((struct args_ws_thread*)args)->nodo;
 
-    printf("\nH:%d\n",puerto);
+    // printf("\nH:%d\n",puerto);
 
-    sprintf(direccion,"http://%s:%d",s_direccion_escucha,puerto);      
+    sprintf(direccion,"https://%s:%d",s_direccion_escucha,puerto);      
     // sprintf(direccion,"%s:%d","http://localhost",puerto);
-    mg_http_listen(&mgr, direccion, fn, NULL);
+    mg_http_listen(&mgr, direccion, fn,&nodo);
     for (;;) mg_mgr_poll(&mgr, 1000);
 
     pthread_exit(NULL);
@@ -68,11 +69,13 @@ void *lanzar_servidor_ws(void *args){
 
 void *iniciar_ws(void *args){
     pthread_t tid;
-    int puerto = *((int*)args);//8001;//generar_puerto();
+    // int puerto = *((int*)args);//8001;//generar_puerto();
     struct mg_mgr mgr;
+    struct args_ws_thread *aux_args = ((struct args_ws_thread*)args);
     struct args_ws_thread s_args;
 
-    s_args.puerto = puerto;
+    s_args.puerto = aux_args->puerto;
+    s_args.nodo = aux_args->nodo;
 
     mg_mgr_init(&mgr);
     s_args.mgr = mgr;
@@ -83,17 +86,21 @@ void *iniciar_ws(void *args){
     LOG(LL_INFO,("Limpiando WS!"));
     
     mg_mgr_free(&mgr);
+    free(aux_args);
     pthread_exit(NULL);
 }
 
 
 //Crear ws
-void crear_ws(int puerto){
+void crear_ws(int puerto, int nodo){
     pthread_t tid;
-    int *ptr = (int*) malloc(sizeof(int));
-    *ptr = puerto;
-
-    pthread_create(&tid,NULL,iniciar_ws,ptr);
+    //Aquí
+    // int *ptr = (int*) malloc(sizeof(int));
+    // *ptr = puerto;
+    struct args_ws_thread *args = (struct args_ws_thread *) malloc(sizeof(struct args_ws_thread));
+    args->puerto = puerto;
+    args->nodo = nodo;
+    pthread_create(&tid,NULL,iniciar_ws,args);
     // pthread_join(tid,NULL);
     // printf("Terminando WS!");
 }

@@ -6,12 +6,12 @@ usrForm = document.getElementById("usr-form");
 pswForm = document.getElementById("psw-form");
 errorMsg = document.getElementById("error-msg");
 
-const ipServidor = '192.168.0.16'
+const ipServidor = '192.168.15.12'
 const portServidor = 8000
 
 function logSubmit(event) {
     event.preventDefault();
-    var url = `http://${ipServidor}:${portServidor}/login_data`
+    var url = `https://${ipServidor}:${portServidor}/login_data`
     var data = `{"usr":"${usrForm.value}","psw":"${pswForm.value}"}`
     
     fetch(url, {
