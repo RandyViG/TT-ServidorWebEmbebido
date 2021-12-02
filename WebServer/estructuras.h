@@ -63,3 +63,9 @@ struct args_ws_thread{
     int puerto;
     int nodo;
 };
+
+struct args_ws_client{
+    struct mg_connection *c;
+    int nodo;
+    struct args_ws_client *ptr;
+};

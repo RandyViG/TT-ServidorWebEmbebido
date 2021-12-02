@@ -14,6 +14,25 @@ int generar_puerto(){
     return puerto;
 }
 
+void *responder_client(void *args){
+  struct args_ws_client *args_s;
+  struct datos_recibidos datos;
+  char strS[300];
+  int len;
+  args_s = ((struct args_ws_client *)args);
+  // LOG(LL_INFO,("ENTRO HILO %d",args_s->nodo));
+
+  leer_medidas(args_s->nodo,&datos);
+  sprintf(strS,"{\"hum\":%.2f,\"gas\":%.2f,\"temp\":%.2f}",datos.medicion_hum,datos.medicion_gas,datos.medicion_temp);
+  len=str_len(strS);
+  sleep(1);
+  mg_ws_send(args_s->c,strS, len-1, WEBSOCKET_OP_TEXT);
+  // LOG(LL_INFO,("SALGO HILO"));
+
+  free(args_s->ptr);
+  pthread_exit(NULL);
+}
+
 void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
   if (ev == MG_EV_ACCEPT) {
     struct mg_tls_opts opts = {
@@ -34,15 +53,14 @@ void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
     msg = (struct mg_ws_message *)ev_data;
     // LOG(LL_INFO,("MSG: %s",msg->data.ptr));
     if(!strcmp("SMO",msg->data.ptr)){
-        struct datos_recibidos datos;
-        char strS[300];
-        int len;
+        pthread_t tid;
+        struct args_ws_client *args;
 
-        leer_medidas(*(int*)fn_data,&datos);
-        sprintf(strS,"{\"hum\":%.2f,\"gas\":%.2f,\"temp\":%.2f}",datos.medicion_hum,datos.medicion_gas,datos.medicion_temp);
-        len=str_len(strS);
-        sleep(1);
-        mg_ws_send(c,strS, len-1, WEBSOCKET_OP_TEXT);
+        args = (struct args_ws_client *) malloc(sizeof(struct args_ws_client));
+        args->c = c;
+        args->nodo = *(int*)fn_data;
+        args->ptr = args;
+        pthread_create(&tid,NULL,responder_client,args);
     }
   }
   if(ev == 12){

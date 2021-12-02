@@ -1,6 +1,6 @@
-const ip = 'https://d826-200-194-18-53.ngrok.io'
+const ip = `https://${server}`
 const port = 8000
-const url = `https://d826-200-194-18-53.ngrok.io/datos_sensor`;
+const url = `https://${server}/datos_sensor`;
 var data = `{"sesion":${obtSessionID()}}`;
 
 const lblTemp = document.getElementById("temp-data");
