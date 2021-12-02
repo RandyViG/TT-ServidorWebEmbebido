@@ -46,8 +46,8 @@ void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
     }
   }
   if(ev == 12){
-    LOG(LL_INFO,("Borrar hilo %d",getpid()));
-    pthread_exit(NULL);
+    //LOG(LL_INFO,("Borrar hilo %d",getpid()));
+    //pthread_exit(NULL);
   }
 }
 

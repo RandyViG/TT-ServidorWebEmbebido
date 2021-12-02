@@ -28,11 +28,11 @@ function upUsrSubmin(event) {
             console.log("Contraseñas iguales");
             // console.log(addUserBool);
             if(addUserBool === "true"){
-                url = `https://192.168.15.12:8000/agregar_usuario`
+                url = `https://${server}/agregar_usuario`
                 data = `{"usr":"${usrForm.value}","psw":"${pswForm.value}","email":"${emailForm.value}","nodo":${formNodo.value},"session":${obtSessionID()}}`
             }
             else{
-                url = `https://192.168.15.12:8000/edit_usuario`
+                url = `https://${server}/edit_usuario`
                 data = `{"usr":"${usrForm.value}","psw":"${pswForm.value}","target":"${obtVariable("user")}","nodo":${formNodo.value},"email":"${emailForm.value}","session":${obtSessionID()}}`
             }
 

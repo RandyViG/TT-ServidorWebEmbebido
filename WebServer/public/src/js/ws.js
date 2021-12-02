@@ -1,6 +1,6 @@
-const ip = '192.168.15.12'
+const ip = 'https://d826-200-194-18-53.ngrok.io'
 const port = 8000
-const url = `https://${ip}:${port}/datos_sensor`;
+const url = `https://d826-200-194-18-53.ngrok.io/datos_sensor`;
 var data = `{"sesion":${obtSessionID()}}`;
 
 const lblTemp = document.getElementById("temp-data");
@@ -20,7 +20,7 @@ fetch(url, {
 .then(data => {
     if(data.result === 200){
         console.log(data);
-        const socket = new WebSocket(`wss://${ip}:${data.port}`);
+        const socket = new WebSocket(`wss://${websocket}`);
         // Abre la conexión
         socket.addEventListener('open', function (event) {
             socket.send('Open conection!');

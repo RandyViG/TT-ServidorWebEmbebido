@@ -14,6 +14,7 @@
 #include "handlers.h"
 #include "mongoose.h"
 #include "estructuras.h"
+#include "websockets.h"
 
 int fin;
 pthread_mutex_t sensores_lock;
@@ -49,6 +50,9 @@ int main( int argc, char *argv[] ){
         exit( EXIT_FAILURE );
     }
     
+    crear_ws(8100,1);
+
+
     fin = 1;
     while( fin )
         mg_mgr_poll( &mgr_http, 1000 );

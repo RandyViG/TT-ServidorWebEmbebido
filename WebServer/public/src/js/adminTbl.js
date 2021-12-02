@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
  }, false);
 
 function obtenerDatosUsuario() {
-    var url = `https://192.168.15.12:8000/datos_usuarios`
+    var url = `https://${server}/datos_usuarios`
     var data = `{"usr":"admin"}`
     
     fetch(url, {
