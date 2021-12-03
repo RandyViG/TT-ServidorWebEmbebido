@@ -31,13 +31,13 @@ void manejador_sen( int sen ){
 * @return: Datos de función													
 ******************************************************************/
 void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *datos_fn ){
-    if (ev == MG_EV_ACCEPT) {
-    struct mg_tls_opts opts = {
-      .cert = "cert.pem",    // Certificate file
-      .certkey = "key.pem",  // Private key file
-    };
-    mg_tls_init(c, &opts);
-    }
+    // if (ev == MG_EV_ACCEPT) {
+    // struct mg_tls_opts opts = {
+    //   .cert = "cert.pem",    // Certificate file
+    //   .certkey = "key.pem",  // Private key file
+    // };
+    // mg_tls_init(c, &opts);
+    // }
     if( ev == MG_EV_HTTP_MSG ){
         struct mg_http_message *hm = (struct mg_http_message *) datos_ev;
         struct mg_http_serve_opts opts = {.mime_types = "text/html",.extra_headers = "Access-Control-Allow-Origin: *\r\n"};

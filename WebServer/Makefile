@@ -4,8 +4,8 @@ DESTDIR=/usr/local/bin
 DAEMONDIR=/etc/systemd/system
 DAEMON_SCRIPT=servidor_web_embebido.service
 CFLAGS=-Wall
-OPTIONS=-DMG_ENABLE_DIRECTORY_LISTING=1 -DMG_ENABLE_OPENSSL=1 -I$(/usr/bin/openssl)/include
-LFLAGS=-lm -lpthread -lssl -lcrypto
+OPTIONS=-DMG_ENABLE_DIRECTORY_LISTING=1 
+LFLAGS=-lm -lpthread
 CC=gcc
 
 all: $(PROYECTO)

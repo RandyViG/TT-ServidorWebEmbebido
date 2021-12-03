@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
  }, false);
 
 function obtenerDatosUsuario() {
-    var url = `https://${server}/datos_usuarios`
+    var url = `http://${server}/datos_usuarios`
     var data = `{"usr":"admin"}`
     
     fetch(url, {

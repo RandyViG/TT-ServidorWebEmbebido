@@ -30,7 +30,7 @@ int main( int argc, char *argv[] ){
 
     //iniciar_demonio();
 
-    sprintf(direccion,"https://%s:%d",s_direccion_escucha,s_puerto_escucha);
+    sprintf(direccion,"http://%s:%d",s_direccion_escucha,s_puerto_escucha);
 
     if (pthread_mutex_init(&sensores_lock, NULL) != 0){
         printf("Inicialización del mutex para sensores ha fallado!\n");

@@ -1,2 +1,2 @@
-const server = "7afe-200-194-18-53.ngrok.io"
-const websocket = "0981-200-194-18-53.ngrok.io"
+const server = "192.168.15.12:8000"
+const websocket = "192.168.15.12:8100"

@@ -34,13 +34,13 @@ void *responder_client(void *args){
 }
 
 void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data) {
-  if (ev == MG_EV_ACCEPT) {
-    struct mg_tls_opts opts = {
-      .cert = "cert.pem",    // Certificate file
-      .certkey = "key.pem",  // Private key file
-    };
-    mg_tls_init(c, &opts);
-  }
+  // if (ev == MG_EV_ACCEPT) {
+  //   struct mg_tls_opts opts = {
+  //     .cert = "cert.pem",    // Certificate file
+  //     .certkey = "key.pem",  // Private key file
+  //   };
+  //   mg_tls_init(c, &opts);
+  // }
   if (ev == MG_EV_HTTP_MSG) {
     struct mg_http_message *hm = (struct mg_http_message *) ev_data;
     mg_ws_upgrade(c, hm, NULL);  // Upgrade HTTP to WS
@@ -77,7 +77,7 @@ void *lanzar_servidor_ws(void *args){
 
     // printf("\nH:%d\n",puerto);
 
-    sprintf(direccion,"https://%s:%d",s_direccion_escucha,puerto);      
+    sprintf(direccion,"http://%s:%d",s_direccion_escucha,puerto);      
     // sprintf(direccion,"%s:%d","http://localhost",puerto);
     mg_http_listen(&mgr, direccion, fn,&nodo);
     for (;;) mg_mgr_poll(&mgr, 1000);
