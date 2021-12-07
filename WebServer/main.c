@@ -28,7 +28,7 @@ int main( int argc, char *argv[] ){
     struct mg_connection *c;
     pthread_t tid_servidor_tcp;
 
-    //iniciar_demonio();
+    iniciar_demonio();
 
     sprintf(direccion,"http://%s:%d",s_direccion_escucha,s_puerto_escucha);
 
@@ -42,7 +42,7 @@ int main( int argc, char *argv[] ){
 
     signal( SIGINT, manejador_sen );
     mg_mgr_init( &mgr_http );
-    //pthread_create(&tid_servidor_tcp,NULL,servidor_tcp,args_tcp);
+    
     pthread_create(&tid_servidor_tcp, NULL, servidor_tcp, (void*)&mgr_tcp);
 
     if( ( c = mg_http_listen( &mgr_http, direccion, manejador_servidor, &mgr_http) ) == NULL ){
@@ -51,7 +51,6 @@ int main( int argc, char *argv[] ){
     }
     
     crear_ws(8100,1);
-
 
     fin = 1;
     while( fin )

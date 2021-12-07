@@ -1,6 +1,6 @@
 PROYECTO=servidor_web_embebido
 OBJECTS:=$(patsubst %.c,%.o,$(wildcard *.c))
-DESTDIR=/usr/local/bin
+DESTDIR=/usr/bin
 DAEMONDIR=/etc/systemd/system
 DAEMON_SCRIPT=servidor_web_embebido.service
 CFLAGS=-Wall
@@ -18,19 +18,19 @@ $(PROYECTO): ${OBJECTS}
 
 install: all 
 	if [ ! -d $(DESTDIR) ]; then \
-		sudo mkdir $(DESTDIR); \
+		mkdir $(DESTDIR); \
 	fi; \
-	sudo cp $(PROYECTO) $(DESTDIR)
+	cp $(PROYECTO) $(DESTDIR)
 
 uninstall:
-	sudo rm $(DESTDIR)/$(PROYECTO)
+	rm $(DESTDIR)/$(PROYECTO)
 
 daemon:
 	if [ ! -f $(DAEMONDIR)/$(DAEMON_SCRIPT) ]; then \
-		sudo cp $(DAEMON_SCRIPT) $(DAEMONDIR); \
+		cp $(DAEMON_SCRIPT) $(DAEMONDIR); \
 	fi; \
-	sudo systemctl enable servidor_web_embebido.service
-	sudo systemctl start servidor_web_embebido.service
+	systemctl start servidor_web_embebido.service
+	systemctl enable servidor_web_embebido.service
 
 clean: 
 	rm -f *.o $(PROYECTO)

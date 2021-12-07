@@ -38,7 +38,7 @@ void iniciar_demonio(){
     }
     if( pid ){
    	    printf("PID del segundo proceso hijo %d \n", pid);
-        apArch = fopen("/var/run/servidor_rtcc.pid", "w");
+        apArch = fopen("/var/run/servidor_web_embebido.pid", "w");
         fprintf(apArch, "%d", pid);
         fclose(apArch);
 
@@ -51,5 +51,5 @@ void iniciar_demonio(){
 	close( STDOUT_FILENO );
 	close( STDERR_FILENO );
    
-	openlog( "servidor_rtcc", LOG_NDELAY | LOG_PID, LOG_LOCAL0 );
+	openlog( "servidor_web_embebido", LOG_NDELAY | LOG_PID, LOG_LOCAL0 );
 }

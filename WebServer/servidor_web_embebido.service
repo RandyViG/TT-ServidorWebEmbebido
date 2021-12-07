@@ -6,7 +6,7 @@ After			= syslog.target
 #forking, describe el comportamiento tradicional de los demonios en UNIX
 Type			= forking
 PIDFile			= /var/run/servidor_web_embebido.pid
-ExecStart		= /usr/local/bin/servidor_web_embebido
+ExecStart		= /usr/bin/servidor_web_embebido
 
 #Se manda SIGTERM al proceso principal y a todos los procesos 
 #del grupo
@@ -25,4 +25,4 @@ RestartSec		= 5s
 StandardOutput	= syslog
 
 [Install]
-WantedBy
+WantedBy        = multi-user.target
