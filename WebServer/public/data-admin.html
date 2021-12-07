@@ -12,23 +12,25 @@
     <div class="container">
         <section class="sidebar">
             <nav class="sidebar_nav">
-                <img class="icons" src="./src/assets/dashboard-icon.png" alt="">
-                <img class="icons" src="./src/assets/exit-icon-128.png" alt="">
+                <a id="btn-dashboard" ><img class="icons" src="./src/assets/dashboard-icon.png" alt=""></a>
+                <a id="btn-logout"><img class="icons" src="./src/assets/exit-icon-128.png" alt=""></a>
             </nav>
         </section>
         <section class="content">
             <header class="content_header">
                 <div>
                     <img src="./src/assets/user-icon.png" alt="">
-                    <i>admin</i>
+                    <i id="nav_usr_name"></i>
                 </div>
             </header>
             <main class="content_main">
-                <form class="main_form" action="">
-                    <input class="main_form-input" type="number" placeholder="Id. Nodo Sensor">
-                    <input class="main_form-input" type="text" placeholder="Nombre de usuario">
-                    <input class="main_form-input" type="password" placeholder="Nueva contraseña">
-                    <input class="main_form-input" type="password" placeholder="Confirmar contraseña">
+                <form id="form-up-usr" class="main_form" action="">
+                    <div id="error-msg" class="error-msg-s hidden"><label>Nombre de usuario ocupado o las contraseñas no coinciden</label></div>
+                    <input id="lbl-sensor" class="main_form-input" type="number" placeholder="Id. Nodo Sensor">
+                    <input id="lbl-nombre-usr" class="main_form-input" type="text" placeholder="Nombre de usuario">
+                    <input id="lbl-mail" class="main_form-input" type="text" placeholder="E-mail">
+                    <input id="lbl-psw" class="main_form-input" type="password" placeholder="Nueva contraseña">
+                    <input id="lbl-conf-psw" class="main_form-input" type="password" placeholder="Confirmar contraseña">
                     <button class="main_form-button">Enviar</button>
                 </form>
             </main>
@@ -37,8 +39,8 @@
             </footer>
         </section>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./src/js/charts.js"></script>
+    <script src="./src/js/config.js"></script>
+    <script src="./src/js/form_admin.js"></script>
+    <script src="./src/js/navigation.js"></script>
 </body>
 </html>

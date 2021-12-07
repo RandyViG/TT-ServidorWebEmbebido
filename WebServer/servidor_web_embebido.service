@@ -1,0 +1,28 @@
+[Unit]
+Description     = Servidor Web Embebido
+After			= syslog.target
+
+[Service]
+#forking, describe el comportamiento tradicional de los demonios en UNIX
+Type			= forking
+PIDFile			= /var/run/servidor_web_embebido.pid
+ExecStart		= /usr/bin/servidor_web_embebido
+
+#Se manda SIGTERM al proceso principal y a todos los procesos 
+#del grupo
+KillMode		= mixed
+
+#on-failure, permite que el demonio se reinicie si 
+#se usa SIGKILL pero con SIGTERM no se reinicia
+#always, permite que el demonio se reinicie siempre
+#no importa que se use SIGKILL o SIGTERM
+
+Restart			= on-failure
+RestartSec		= 5s
+
+#Se usa /dev/null para sistemas en produccion para no 
+#llenar el disco en lugar de syslog
+StandardOutput	= syslog
+
+[Install]
+WantedBy        = multi-user.target

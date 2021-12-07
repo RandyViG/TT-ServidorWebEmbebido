@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "estructuras.h"
+#include "procesamiento.h"
 #include "mjson.h"
 #include "mongoose.h"
 
@@ -17,9 +18,9 @@ int agregar_sesion(char *usuario,struct datos_sesion *sesion){
     FILE *fpr;
     char c;
 
-    int id,len_usr,i=0,flag=0;
+    int id,len_usr,i=0,flag=0,max_len;
     time_t creado_el = time(0);
-    char id_str[10];
+    char id_str[10],str_put[500];
     mg_sha1_ctx ctx;
     unsigned char dig[20];
 
@@ -31,6 +32,8 @@ int agregar_sesion(char *usuario,struct datos_sesion *sesion){
     mg_sha1_update(&ctx,(unsigned char *)id_str,10);
     mg_sha1_update(&ctx,(unsigned char *)"CHSMPP",7);
     mg_sha1_final(dig,&ctx);
+
+    // max_len = 84 + 10 + 18 + str_len(usuario) + 10;
 
     fpr=fopen("sesiones.json","r+");
 
@@ -46,25 +49,43 @@ int agregar_sesion(char *usuario,struct datos_sesion *sesion){
             i+=1;
             if((int)c == -1){
                 if(flag > 0){
+                    #if defined(__arm__)
+                    fprintf(fpr,"[\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%llu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el);
+                    #else
                     fprintf(fpr,"[\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el);
+                    #endif
                     break;
                 }
                 flag++;
             }
             if(c == '['){        
-                LOG(LL_INFO,("Tamaño de i: %d",i));
-                if(i<105)
-                    fprintf(fpr,"\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el);
+                // "\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el
+                #if defined(__arm__)
+                sprintf(str_put,"\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%llu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}",id,*(uint64_t *) dig,usuario,creado_el);
+                #else
+                sprintf(str_put,"\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}",id,*(uint64_t *) dig,usuario,creado_el);
+                #endif
+                max_len = str_len(str_put) + 1;
+                LOG(LL_INFO,("Tamaño de i: %d, len: %d",i,max_len));
+                if(i-1<=max_len)
+                    fprintf(fpr,"%s\n]",str_put);
                 else
-                    fprintf(fpr,"\n\t{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n",id,*(uint64_t *) dig,usuario,creado_el);
+                    fprintf(fpr,"%s\n",str_put);
                 break;
             }    
             if(c == '}'){
-                LOG(LL_INFO,("Tamaño de i: %d",i));
-                if(i<105)                
-                    fprintf(fpr,"\n\t,{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n]",id,*(uint64_t *) dig,usuario,creado_el);
+                #if defined(__arm__)
+                sprintf(str_put,"\n\t,{\n\t\"id\":\"%d\",\n\t\"sha\":\"%llu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}",id,*(uint64_t *) dig,usuario,creado_el);
+                #else
+                sprintf(str_put,"\n\t,{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}",id,*(uint64_t *) dig,usuario,creado_el);
+                #endif
+                max_len = str_len(str_put) + 1;
+                LOG(LL_INFO,("Tamaño de i: %d, len: %d",i,max_len));
+                
+                if(i-1<=max_len)                
+                    fprintf(fpr,"%s\n]",str_put);
                 else
-                    fprintf(fpr,"\n\t,{\n\t\"id\":\"%d\",\n\t\"sha\":\"%lu\",\n\t\"usuario\":\"%s\",\n\t\"creacion\":\"%ld\"\n\t}\n",id,*(uint64_t *) dig,usuario,creado_el);
+                    fprintf(fpr,"%s\n",str_put);
                 break;
             }
         }        
@@ -169,7 +190,7 @@ int buscar_sesion_por_id(int id, struct datos_sesion *sesion){
             len = i;
             i=0;
 
-            printf("%s ** %d\n",buff,len);
+            // printf("%s ** %d\n",buff,len);
             n = mjson_get_string(buff,len,"$.id",id_enc,sizeof(id_enc));
             if (n<0){
                 fclose(fp);    
@@ -244,7 +265,7 @@ int eliminar_sesion(int id){
             len = i;
             i=0;
 
-            LOG(LL_INFO,("%s ** %d\n",buff,len));
+            //LOG(LL_INFO,("%s ** %d\n",buff,len));
             n = mjson_get_string(buff,len,"$.id",id_enc,sizeof(id_enc));
             if (n<0){
                 fclose(fp_busqueda);
@@ -284,15 +305,22 @@ int validar_sesion(int id, uint64_t sha){
     int n;
 
     sprintf(id_str,"%d",id);
+    #if defined(__arm__)
+    sprintf(sha_str,"%llu",sha);
+    #else
     sprintf(sha_str,"%lu",sha);
-    
+    #endif
     n = buscar_sesion_por_id(id,&sesion);
 
     if(n>0){
         if(sesion.sha == sha){
             return 1;
         }else{
+            #if defined(__arm__)
+            LOG(LL_ERROR,("SHA no válido: %llu : %llu\n",sesion.sha,sha));
+            #else
             LOG(LL_ERROR,("SHA no válido: %lu : %lu\n",sesion.sha,sha));
+            #endif
             return -1;
         }
     }else{
@@ -400,4 +428,17 @@ int buscar_id_sesion(char *cookie, int len){
     ses_id = atoi(id);
 
     return ses_id;
+}
+
+int buscar_nombre_sesion(char *cookie, int len, char *buffer){
+    char buff[len+20],nombre[50];
+    int n,len_json;
+
+    len_json = cookie_a_json(cookie,len,buff);
+    n = mjson_get_string(buff,len_json,"$.session_user",nombre,sizeof(nombre));
+    if(n<0){
+        return -1;
+    }
+    strcpy(buffer,nombre);
+    return n;
 }

@@ -6,6 +6,8 @@ btnSettings = document.getElementById("btn-settings");
 btnDashboard = document.getElementById("btn-dashboard");
 
 btnLogout.addEventListener('click',logout);
+btnSettings ? btnSettings.addEventListener('click',irConfigurar) : null;
+btnDashboard.addEventListener('click',irDashboard);
 
 function setName() {
     let arr = document.cookie.split(';');
@@ -20,4 +22,12 @@ function setName() {
 
 function logout(){
     window.location.href = '/logout';
+}
+
+function irConfigurar() {
+    window.location.href = '/configuracion';
+}
+
+function irDashboard() {
+    window.location.href = '/';
 }

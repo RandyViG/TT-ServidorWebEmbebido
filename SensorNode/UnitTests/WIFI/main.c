@@ -157,13 +157,11 @@ int main (void){
         
     for( ; EVER ; ){
         enviar_wifi();
-      
         U2TXREG = (idNodo & 0xFF00)>>8;
         U2TXREG = idNodo & 0x00FF;
         U2TXREG = idTemperatura;
         U2TXREG = (temperatura & 0xFF00)>>8;
-        U2TXREG = temperatura & 0x00FF;
-        
+        U2TXREG = temperatura & 0x00FF;        
         retardo_1S();  
         cerrar_conexion();
         asm("nop");   

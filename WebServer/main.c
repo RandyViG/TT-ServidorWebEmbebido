@@ -9,21 +9,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-
-#include "handlers.h"
+#include "hilo.h"
+#include "demonio.h"
+#include "manejadores.h"
 #include "mongoose.h"
 #include "estructuras.h"
+#include "websockets.h"
 
 int fin;
 pthread_mutex_t sensores_lock;
 /*Directorio raiz donde se alojaran las vistas renderizadas por el servidor*/
 const char *dir_raiz = "./public";
-
-struct args_thread{
-    struct mg_mgr *mgr;
-};
-
-void *servidor_tcp(void *args);
 
 int main( int argc, char *argv[] ){
     char direccion[30];
@@ -32,7 +28,9 @@ int main( int argc, char *argv[] ){
     struct mg_connection *c;
     pthread_t tid_servidor_tcp;
 
-    sprintf(direccion,"%s:%d",s_direccion_escucha,s_puerto_escucha);
+    iniciar_demonio();
+
+    sprintf(direccion,"http://%s:%d",s_direccion_escucha,s_puerto_escucha);
 
     if (pthread_mutex_init(&sensores_lock, NULL) != 0){
         printf("Inicialización del mutex para sensores ha fallado!\n");
@@ -44,13 +42,16 @@ int main( int argc, char *argv[] ){
 
     signal( SIGINT, manejador_sen );
     mg_mgr_init( &mgr_http );
-    pthread_create(&tid_servidor_tcp,NULL,servidor_tcp,args_tcp);
+    
+    pthread_create(&tid_servidor_tcp, NULL, servidor_tcp, (void*)&mgr_tcp);
 
     if( ( c = mg_http_listen( &mgr_http, direccion, manejador_servidor, &mgr_http) ) == NULL ){
         fprintf( stderr, "Error, no se puede escuchar en la dirección %s", s_direccion_escucha );
         exit( EXIT_FAILURE );
     }
     
+    crear_ws(8100,1);
+
     fin = 1;
     while( fin )
         mg_mgr_poll( &mgr_http, 1000 );
@@ -63,26 +64,4 @@ int main( int argc, char *argv[] ){
     free(args_tcp);
     pthread_mutex_destroy(&sensores_lock);
     return 0;
-}
-
-/******************************************************************
-* @brief: Rutina que será ejecutada por un hilo donde se recibirán
-* las tramas tcp del microcontrolador
-* @param: NINGUNO                                                      
-* @return: NINGUNO														
-******************************************************************/
-void *servidor_tcp(void *args){
-    struct mg_mgr *mgr;
-    mgr = ((struct args_thread *)args)->mgr;
-
-    mg_mgr_init( mgr );
-    
-    LOG(LL_INFO, ("Iniciando Servidor TCP"));
-                               
-    mg_listen(mgr, "tcp://127.0.0.1:1234", manejador_tcp, mgr);
-    for (;;) mg_mgr_poll(mgr, 1000);
-    
-    LOG(LL_INFO,("TERMINANDO SERVIDOR TCP"));
-
-    pthread_exit(NULL);
 }

@@ -1,0 +1,151 @@
+#!/usr/bin/expect -f
+
+set dest [lindex $argv 0];
+set usr [lindex $argv 1];
+set timeout -1
+
+spawn openssl s_client -connect smtp.gmail.com:465 -crlf
+
+expect -re "220 "
+send -- "EHLO smtp.gmail.com\n"
+
+expect "250 SMTPUTF8"
+send "auth login\n"
+
+expect "334 VXNlcm5hbWU6"
+send -- "aW5mb3N3ZWIwNTNAZ21haWwuY29tCg==\n"
+ 
+expect "334 UGFzc3dvcmQ6"
+send -- "ZGVtb2RlbW8K\n"
+ 
+expect "235 2.7.0 Accepted"
+# mail from:<infosweb053@gmail.com>
+send -- "mail from:<infosweb053@gmail.com>\n"
+
+expect -re "250 "
+# rcpt to: <infosweb053@gmail.com>
+send -- "rcpt to:<$dest>\n"
+
+expect {
+    "250 " {
+        send -- "Data\n"
+    }
+    "553 " {
+        exit
+        exp_continue
+    }
+    exp_continue
+    }
+
+expect -re "354 "
+send -- "From: <infosweb053@gmail.com>\n"
+send -- "To: $dest\n"
+send -- "Subject: URGENTE! $usr, se detecto una fuga de gas!\n"
+send -- "Mime-Version: 1.0\n"
+send -- "Content-Type: text/html\n"
+send -- "
+<!DOCTYPE html>
+<html lang='en' xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:v='urn:schemas-microsoft-com:vml'>
+<head>
+    <meta charset='UTF-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
+    <link href='https://fonts.googleapis.com/css?family=Cabin' rel='stylesheet' type='text/css'/>
+    <style>
+        * {
+            padding: 0;
+            border: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #f8f7f7e4;
+        }
+        .sec {
+            background-color: #d9dffa;
+            height: 30px;
+        }
+        .title {
+            font-size: 23px; 
+            margin: 5px 30px;
+            text-align: center;
+            color: #ff7800; 
+            line-height: 1.2; 
+            font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+        }
+        .container {
+            margin: 20px 20px;
+        }
+        .user{
+            align-self: flex-start;
+        }
+        p {
+            font-size: 15px; 
+            color: #40507a; 
+            line-height: 1.2; 
+            font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+        }
+        ul {
+            line-height: 120%;
+            font-size: 14px;
+            margin: 5px 30px;
+        }
+        li {
+            color: #40507a;
+            text-decoration: underline;
+            text-align: left;
+            font-weight: bold;
+        }
+        span {
+            font-size: 14px; 
+            color: #97a2da; 
+            line-height: 1.2;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .center {
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class='sec'></div>
+    <h1 class='title'>¡Se ha detectado una posible fuga de Gas LP!</h1>
+    <div class='container'>
+        <p class='user'>
+            Hola $usr,
+        </p>
+        <p> 
+            Se ha detectado un valor anormal en la lectura del sensor de gas, lo cual 
+            puede ser causado por una fuga de gas LP.
+        </p>
+        <p>
+            Por favor, verifique los lugares donde pueda haber posibles fugas de gas o llame
+            a los números de emergencia.
+        </p>
+        <ul>
+            <li>911 Emergencias</li>
+            <li>065 Cruz Roja Mexicana</li>
+            <li>068 Bomberos</li>
+        </ul>
+    </div>
+    <div class='container'>
+        <div class='center'>
+            <span> Este email ha sido enviado automaticamente en respuesta a los sensores instalados en su casa.</span>
+        </div>
+        <div class='center'>
+            <span> Si considera que esto ha sido un error por favor contactenos en infoweb053@gmail.com</span>
+        </div>
+        <div class='center'>
+            <span>TT-B053</span>
+        </div>
+    </div>
+    <div class='sec'></div>
+</body>
+</html>"
+send -- "\n"
+send -- ".\n"
+
+expect -re "250 "
+send "Q\n"
