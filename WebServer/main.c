@@ -28,7 +28,7 @@ int main( int argc, char *argv[] ){
     struct mg_connection *c;
     pthread_t tid_servidor_tcp;
 
-    iniciar_demonio();
+    //iniciar_demonio();
 
     sprintf(direccion,"http://%s:%d",s_direccion_escucha,s_puerto_escucha);
 

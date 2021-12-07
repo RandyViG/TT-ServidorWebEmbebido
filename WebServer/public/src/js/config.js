@@ -1,2 +1,2 @@
-const server = "192.168.15.12:8000"
-const websocket = "192.168.15.12:8100"
+const server = "192.168.0.16:8000"
+const websocket = "192.168.0.16:8100"
