@@ -3,9 +3,7 @@
 /*Dirección IP y puerto donde se alojará el servidor web*/
 #define s_direccion_escucha "192.168.15.12"
 #define s_puerto_escucha 8000
-
-/*Direccion IP y puerto donde se reciben las tramas del nodo sensor*/
-#define sock_direccion_escucha "192.168.15.12"
+/*Puerto donde se reciben las tramas del nodo sensor*/
 #define sock_puerto_escucha 6000
 
 struct args_thread{

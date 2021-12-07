@@ -9,7 +9,7 @@ errorMsg = document.getElementById("error-msg");
 
 function logSubmit(event) {
     event.preventDefault();
-    var url = `http://${server}/login_data`
+    var url = `https://${server}/login_data`
     var data = `{"usr":"${usrForm.value}","psw":"${pswForm.value}"}`
     
     fetch(url, {

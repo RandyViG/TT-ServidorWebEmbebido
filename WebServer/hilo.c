@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#include "handlers.h"
+#include "manejadores.h"
 #include "mongoose.h"
 #include "estructuras.h"
 
@@ -18,7 +18,7 @@ void * servidor_tcp(void *args){
     char direccion[40];
     //mgr = ((struct args_thread *)args)->mgr;
     mgr = (struct mg_mgr *)args;
-    sprintf(direccion,"tcp://%s:%d",sock_direccion_escucha,sock_puerto_escucha);   
+    sprintf(direccion,"tcp://%s:%d",s_direccion_escucha,sock_puerto_escucha);   
     LOG(LL_INFO, ("TCP DIRECCION: %s",direccion));
     LOG(LL_INFO, ("Iniciando Servidor TCP"));
     mg_mgr_init( mgr );

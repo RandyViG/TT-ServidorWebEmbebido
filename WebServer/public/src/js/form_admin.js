@@ -28,7 +28,7 @@ function upUsrSubmin(event) {
             console.log("Contraseñas iguales");
             // console.log(addUserBool);
             if(addUserBool === "true"){
-                url = `http://${server}/agregar_usuario`
+                url = `https://${server}/agregar_usuario`
                 data = `{"usr":"${usrForm.value}","psw":"${pswForm.value}","email":"${emailForm.value}","nodo":${formNodo.value},"session":${obtSessionID()}}`
             }
             else{

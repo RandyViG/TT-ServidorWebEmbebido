@@ -1,6 +1,6 @@
 const ip = `http://${server}`
 const port = 8000
-const url = `http://${server}/datos_sensor`;
+const url = `https://${server}/datos_sensor`;
 var data = `{"sesion":${obtSessionID()}}`;
 
 const lblTemp = document.getElementById("temp-data");
@@ -20,7 +20,7 @@ fetch(url, {
 .then(data => {
     if(data.result === 200){
         console.log(data);
-        const socket = new WebSocket(`ws://${websocket}`);
+        const socket = new WebSocket(`wss://${websocket}`);
         // Abre la conexión
         socket.addEventListener('open', function (event) {
             socket.send('Open conection!');

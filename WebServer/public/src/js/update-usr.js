@@ -8,7 +8,7 @@ formUsr.addEventListener('submit',upUsrSubmin);
 
 function upUsrSubmin(event) {
     event.preventDefault();
-    var url = `http://${server}/edit_usuario`
+    var url = `https://${server}/edit_usuario`
     var data = `{"usr":"${usrForm.value}","psw":"${pswForm.value}","session":${obtSessionID()}}`
     
     fetch(url, {
