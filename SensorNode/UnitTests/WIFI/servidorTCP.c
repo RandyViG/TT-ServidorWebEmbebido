@@ -9,13 +9,13 @@
 #define COLA_CLIENTES 5 //Tamaño de la cola de espera para clientes
 #define TAM_BUFFER 6
 
-
 int main(int argc, char **argv){
 	int sockfd, cliente_sockfd;
 	struct sockaddr_in direccion_servidor;
 	unsigned char trama[TAM_BUFFER];
 	unsigned short int idNodo, dato;
 	unsigned char idSensor;
+
 	float voCas=0, voSensor=0, lel=0, t=0, h=0;
 
 	memset( &direccion_servidor, 0, sizeof(direccion_servidor) );
@@ -53,7 +53,6 @@ int main(int argc, char **argv){
 			exit(1);
 		}
 
-
 		idNodo = trama[0];
 		idNodo = idNodo << 8 | trama[1];
 
@@ -84,7 +83,7 @@ int main(int argc, char **argv){
 				printf("Sensor not found\n");
 			break;
 		}
-
+    
 		close(cliente_sockfd);
 	}
 	
