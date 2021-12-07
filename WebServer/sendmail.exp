@@ -26,8 +26,16 @@ expect -re "250 "
 # rcpt to: <infosweb053@gmail.com>
 send -- "rcpt to:<$dest>\n"
 
-expect -re "250 "
-send -- "Data\n"
+expect {
+    "250 " {
+        send -- "Data\n"
+    }
+    "553 " {
+        exit
+        exp_continue
+    }
+    exp_continue
+    }
 
 expect -re "354 "
 send -- "From: <infosweb053@gmail.com>\n"

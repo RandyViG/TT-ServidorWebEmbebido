@@ -27,9 +27,9 @@ fetch(url, {
         });
 
         // Escucha por mensajes
-        socket.addEventListener('message', function (event) {
+        socket.addEventListener('message', async function (event) {
             var datos = event.data;
-            // console.log('Data: ', datos);
+            console.log('Data: ', datos);
             sensores = JSON.parse(datos)
 
             if(datos !== '{}'){
@@ -52,6 +52,7 @@ fetch(url, {
             }
             actualizar_grafo();
             // console.log("Datos_graf: ",graph_data);
+            await new Promise(r => setTimeout(r, 1000));
             socket.send('SMO');
         });
     }

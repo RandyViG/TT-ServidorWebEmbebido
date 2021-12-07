@@ -29,6 +29,7 @@ int leer_medidas(int no_nodo, struct datos_recibidos *datos){
   fp = fopen(nombre,"r");
   if(fp == NULL){
     printf("Hubo un error al abrir el archivo\n");
+    pthread_mutex_unlock(&sensores_lock);
     return -1;
   }
   else{
@@ -70,7 +71,7 @@ int leer_medidas(int no_nodo, struct datos_recibidos *datos){
     }else{
       datos->medicion_temp = (float)temp;
     }
-    n = mjson_get_number(buff,len,"$.incidente",&bandera);
+    n = mjson_get_number(buff,len,"$.alerta",&bandera);
     if (n<0){
       fclose(fp);    
       return -1;
@@ -87,14 +88,14 @@ int enviar_correo(char *mail, char *usr){
     char cmd[300];
 
     sprintf(cmd,"./sendmail.exp \"%s\" \"%s\" ",mail,usr);
-    printf("%s",mail);
+    // printf("%s \n",cmd);
     return system(cmd);
 }
 
 int enviar_correo_a_usuarios_nodo(int no_nodo){
     int i=1,len,n1,n2,n3;
     FILE *fp;
-    char c,buff[200],buff_mail[200],buff_usr[100];
+    char c,buff[200],buff_mail[200],buff_usr[200];
     double nodo;
 
     fp = fopen("usuarios.json","r");
@@ -110,7 +111,7 @@ int enviar_correo_a_usuarios_nodo(int no_nodo){
                 buff[0]='{';
                 while(1){
                     c=fgetc(fp);
-                    if(c!=' ' && c!='\n'){
+                    if(c!=' ' && c!='\n' && c!='\t'){
                         buff[i] = c;
                         i++;
                     }
@@ -122,15 +123,15 @@ int enviar_correo_a_usuarios_nodo(int no_nodo){
                 buff[i] = '\0';
                 len = i;
                 i=1;
-                // LOG(LL_INFO,("%s",buff));
+                LOG(LL_INFO,("%s",buff));
                 n1 = mjson_get_number(buff,len,"$.nodo",&nodo);
                 n2 = mjson_get_string(buff,len,"$.email",buff_mail,sizeof(buff_mail));
-                n3 = mjson_get_string(buff,len,"$.user",buff_mail,sizeof(buff_usr));
+                n3 = mjson_get_string(buff,len,"$.user",buff_usr,sizeof(buff_usr));
 
                 if(n1 < 0 || n2 < 0 || n3 < 0) return -1;
                 if((int)nodo == no_nodo){
                   enviar_correo(buff_mail,buff_usr);
-                  LOG(LL_INFO,("Correo enviado a %s para el nodo %d\n",buff_mail,(int)nodo));
+                  LOG(LL_INFO,("Correo enviado a %s: %s para el nodo %d",buff_usr,buff_mail,(int)nodo));
                   //printf("Correo enviado a %s para el nodo %d\n",buff_mail,(int)nodo);
                 }
             }                
@@ -212,6 +213,8 @@ void procesar_cadena(unsigned char *str,struct datos_recibidos *dr){
   LOG(LL_INFO,("ID_NODO: %d",id_nodo));
   LOG(LL_INFO,("ID_SENSOR: %d",id_sensor));
 
+  leer_medidas( id_nodo, &recuperar );
+  dr->alerta = recuperar.alerta;
   switch (id_sensor){
     case 0:
       dr->medicion_temp = 175.0 * ( ( (float)medida)/65535.0 ) - 45.0;
@@ -232,8 +235,10 @@ void procesar_cadena(unsigned char *str,struct datos_recibidos *dr){
 
       /*Verificación de tiempo para correo*/
       if(dr->medicion_gas >= 1.5 && dr->medicion_gas <= 2.5){
-        tiempo_incidencia = time(0) / 60;
-        if(recuperar.alerta - tiempo_incidencia > 1){
+        tiempo_incidencia = time(0);
+        LOG(LL_INFO,("Se debe enviar correo %ld - %ld = %ld",tiempo_incidencia/60,recuperar.alerta,(tiempo_incidencia/60)-(recuperar.alerta)));
+        if((tiempo_incidencia/60)-(recuperar.alerta) > 15){
+          dr->alerta = tiempo_incidencia / 60;
           enviar_correo_a_usuarios_nodo(id_nodo);
         }
       }
