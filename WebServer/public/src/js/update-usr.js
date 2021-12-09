@@ -1,4 +1,5 @@
 usrForm = document.getElementById("lbl-nombre-usr");
+userEmail = document.getElementById("lbl-email");
 pswForm = document.getElementById("lbl-psw");
 ConfPswForm = document.getElementById("lbl-conf-psw");
 formUsr = document.getElementById("form-up-usr");
@@ -9,7 +10,7 @@ formUsr.addEventListener('submit',upUsrSubmin);
 function upUsrSubmin(event) {
     event.preventDefault();
     var url = `https://${server}/edit_usuario`
-    var data = `{"usr":"${usrForm.value}","psw":"${pswForm.value}","session":${obtSessionID()}}`
+    var data = `{"usr":"${usrForm.value}","psw":"${pswForm.value}","email":"${userEmail.value}","session":${obtSessionID()}}`
     
     fetch(url, {
         method: 'POST', // or 'PUT'
@@ -26,11 +27,13 @@ function upUsrSubmin(event) {
             window.location.href = '/logout';
         }else{
             usrForm.classList.add("form-input-error");
+            userEmail.classList.add("form-input-error");
             pswForm.classList.add("form-input-error");
             ConfPswForm.classList.add("form-input-error");
             errorMsg.classList.remove("hidden");
 
             usrForm.value = "";
+            userEmail.value = "";
             pswForm.value = "";
             ConfPswForm.value = "";
             errorMsg.value = "";
