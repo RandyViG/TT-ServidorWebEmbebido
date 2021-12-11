@@ -234,17 +234,24 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
 
                     }else if(admin == 0){
                         //HACER PARA NO ADMINISTRADOR
+                        LOG(LL_INFO,("NO ADMIN %s",hm->body.ptr));
+
                         n1 = mjson_get_string(hm->body.ptr,hm->body.len,"$.usr",nUsr,sizeof(nUsr));
                         n2 = mjson_get_string(hm->body.ptr,hm->body.len,"$.psw",nPsw,sizeof(nPsw));
-                        n3 = mjson_get_string(hm->body.ptr,hm->body.len,"$.email",nPsw,sizeof(nPsw));
+                        n3 = mjson_get_string(hm->body.ptr,hm->body.len,"$.email",email,sizeof(email));
                         if(n1 > 0 && n2 > 0 && n3 > 0){
                             e = actualizar_usuario_admin(sesion.usuario,nUsr,nPsw,email,0);
+                            LOG(LL_INFO,("NO ADMIN"));
+
                             if(e>0){
                                 mg_http_reply( c, 200, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",200);
                             }else{
                                 LOG(LL_ERROR,("Error al actualizar usuario"));
                                 mg_http_reply( c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",500);
                             }
+                        }else{
+                            LOG(LL_ERROR,("Error al actualizar usuario: Algún campo no ha sido llenado"));
+                            mg_http_reply( c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}",500);
                         }
                     }else{
                         LOG(LL_ERROR,("Sesión no válida"));
