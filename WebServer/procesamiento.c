@@ -19,10 +19,10 @@ extern pthread_mutex_t sensores_lock;
 int leer_medidas(int no_nodo, struct datos_recibidos *datos){
   FILE *fp;
   int i,len,n;
-  char c='x',nombre[30],buff[300];
+  char c='x',nombre[35],buff[300];
   double hum,gas,temp,bandera;
 
-  sprintf(nombre,"nodo%d.json",no_nodo);
+  sprintf(nombre,"/home/root/nodos/nodo%d.json",no_nodo);
   
   pthread_mutex_lock(&sensores_lock);
 
@@ -87,7 +87,7 @@ int leer_medidas(int no_nodo, struct datos_recibidos *datos){
 int enviar_correo(char *mail, char *usr){
     char cmd[300];
 
-    sprintf(cmd,"./sendmail.exp \"%s\" \"%s\" ",mail,usr);
+    sprintf(cmd,"/home/root/sendmail.exp \"%s\" \"%s\" ",mail,usr);
     // printf("%s \n",cmd);
     return system(cmd);
 }
@@ -98,7 +98,7 @@ int enviar_correo_a_usuarios_nodo(int no_nodo){
     char c,buff[200],buff_mail[200],buff_usr[200];
     double nodo;
 
-    fp = fopen("usuarios.json","r");
+    fp = fopen("/home/root/session/usuarios.json","r");
 
     if(fp == NULL){
         LOG(LL_INFO,("Hubo un error al abrir el archivo"));
@@ -151,7 +151,7 @@ int enviar_correo_a_usuarios_nodo(int no_nodo){
 ******************************************************************/
 int escribir_medidas(int no_nodo,struct datos_recibidos dr,int id_sensor){
     struct datos_recibidos r;
-    char buffer[100], nombre[30];
+    char buffer[100], nombre[35];
     int fd;
 
     memset(buffer, 0, 100);
@@ -170,7 +170,7 @@ int escribir_medidas(int no_nodo,struct datos_recibidos dr,int id_sensor){
     }
 
     sprintf(buffer,"{\n\t\"temp\":%.2f,\n\t\"hum\":%.2f,\n\t\"gas\":%.2f,\n\t\"alerta\":%ld\n}", r.medicion_temp, r.medicion_hum, r.medicion_gas, dr.alerta);
-    sprintf(nombre,"nodo%d.json",no_nodo);
+    sprintf(nombre,"/home/root/nodos/nodo%d.json",no_nodo);
     fd = open(nombre, O_WRONLY|O_TRUNC|O_CREAT, 0666);
     if( fd == -1 ){
       printf("Hubo un error al abrir el archivo\n");

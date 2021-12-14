@@ -38,9 +38,9 @@ expect {
     }
 
 expect -re "354 "
-send -- "From: <infosweb053@gmail.com>\n"
+send -- "From: TT-B053\n"
 send -- "To: $dest\n"
-send -- "Subject: URGENTE! $usr, se detecto una fuga de gas!\n"
+send -- "Subject: URGENTE! Fuga de Gas LP!\n"
 send -- "Mime-Version: 1.0\n"
 send -- "Content-Type: text/html\n"
 send -- "

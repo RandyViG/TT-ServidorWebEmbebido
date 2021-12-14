@@ -19,7 +19,7 @@
 int fin;
 pthread_mutex_t sensores_lock;
 /*Directorio raiz donde se alojaran las vistas renderizadas por el servidor*/
-const char *dir_raiz = "./public";
+const char *dir_raiz = "/home/root/public";
 
 int main( int argc, char *argv[] ){
     char direccion[30];
@@ -46,7 +46,7 @@ int main( int argc, char *argv[] ){
     pthread_create(&tid_servidor_tcp, NULL, servidor_tcp, (void*)&mgr_tcp);
 
     if( ( c = mg_http_listen( &mgr_http, direccion, manejador_servidor, &mgr_http) ) == NULL ){
-        fprintf( stderr, "Error, no se puede escuchar en la dirección %s", s_direccion_escucha );
+        fprintf( stderr, "Error, no se puede escuchar en la direcció %s\n", s_direccion_escucha );
         exit( EXIT_FAILURE );
     }
     

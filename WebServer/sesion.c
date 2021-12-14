@@ -35,7 +35,7 @@ int agregar_sesion(char *usuario,struct datos_sesion *sesion){
 
     // max_len = 84 + 10 + 18 + str_len(usuario) + 10;
 
-    fpr=fopen("sesiones.json","r+");
+    fpr=fopen("/home/root/.session/sesiones.json","r+");
 
     if(fpr==NULL){
         printf("Hubo un problema al abrir el archivo");
@@ -159,7 +159,7 @@ int buscar_sesion_por_id(int id, struct datos_sesion *sesion){
 
     sprintf(id_str,"%d",id);
 
-    fp = fopen("sesiones.json","r");
+    fp = fopen("/home/root/.session/sesiones.json","r");
 
     if(fp == NULL){
         printf("Hubo un error al abrir el archivo");
@@ -221,8 +221,8 @@ int eliminar_sesion(int id){
 
     sprintf(id_str,"%d",id);
 
-    fp_busqueda = fopen("sesiones.json","r");
-    fp_borrado = fopen("sesiones.json","r+");
+    fp_busqueda = fopen("/home/root/.session/sesiones.json","r");
+    fp_borrado = fopen("/home/root/.session/sesiones.json","r+");
 
 
     if(fp_busqueda == NULL){
@@ -442,3 +442,4 @@ int buscar_nombre_sesion(char *cookie, int len, char *buffer){
     strcpy(buffer,nombre);
     return n;
 }
+

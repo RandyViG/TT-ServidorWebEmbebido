@@ -31,13 +31,6 @@ void manejador_sen( int sen ){
 * @return: Datos de función													
 ******************************************************************/
 void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *datos_fn ){
-    // if (ev == MG_EV_ACCEPT) {
-    // struct mg_tls_opts opts = {
-    //   .cert = "cert.pem",    // Certificate file
-    //   .certkey = "key.pem",  // Private key file
-    // };
-    // mg_tls_init(c, &opts);
-    // }
     if( ev == MG_EV_HTTP_MSG ){
         struct mg_http_message *hm = (struct mg_http_message *) datos_ev;
         struct mg_http_serve_opts opts = {.mime_types = "text/html",.extra_headers = "Access-Control-Allow-Origin: *\r\n"};
@@ -63,17 +56,17 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
                 strncpy(head_buff,s->ptr,s->len);
                 // LOG(LL_INFO,("COOK_ %s LEN_ %ld",head_buff,s->len));
                 if(validar_cookie(head_buff,s->len) > 0){
-                    mg_http_serve_file( c, hm, "./public/index.html",&opts);
+                    mg_http_serve_file( c, hm, "/home/root/public/index.html",&opts);
 
                 }else{
-                    mg_http_serve_file( c, hm, "./public/login.html",&opts);
+                    mg_http_serve_file( c, hm, "/home/root/public/login.html",&opts);
                 }
             }else{
-                mg_http_serve_file( c, hm, "./public/login.html",&opts);
+                mg_http_serve_file( c, hm, "/home/root/public/login.html",&opts);
             }       
         }
         else if( mg_http_match_uri( hm, "/login" ) ){
-            mg_http_serve_file( c, hm, "./public/login.html",&opts);
+            mg_http_serve_file( c, hm, "/home/root/public/login.html",&opts);
         }
         else if(mg_http_match_uri( hm, "/login_data" )){
             /*Ruta que valida si ls datos de sesión mandados por el usuario son válidos o no.*/
@@ -134,9 +127,9 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
                     admin = verificar_administrador(sesion.usuario, len);
                     // printf("ID: %d, NOM: %s ,ADM: %d",id,sesion.usuario,admin);
                     if(admin == 1){
-                        mg_http_serve_file( c, hm, "./public/admin.html",&opts);
+                        mg_http_serve_file( c, hm, "/home/root//public/admin.html",&opts);
                     }else if(admin == 0){
-                        mg_http_serve_file( c, hm, "./public/form_user.html",&opts);
+                        mg_http_serve_file( c, hm, "/home/root/public/form_user.html",&opts);
                     }else{
                         LOG(LL_ERROR,("Sesión no válida"));
                     }
@@ -156,7 +149,7 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
                 id = buscar_id_sesion(head_buff,s->len);
                 if (eliminar_sesion(id)>0){
                     LOG(LL_INFO,("Sesión eliminada correctamente"));
-                    mg_http_serve_file( c, hm, "./public/login.html",&opts);
+                    mg_http_serve_file( c, hm, "/home/root/public/login.html",&opts);
                 }else{
                     LOG(LL_ERROR,("Error al eliminar sesión"));
                     mg_http_reply(c, 500, "Content-Type: application/json\r\n""Access-Control-Allow-Origin: *\r\n", "{\"result\": %d}", 500);
@@ -270,7 +263,7 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
                 printf("Eliminar usuario %s",user);
                 if(eliminar_usuario(user) > 0){
                     LOG(LL_INFO,("Usuario %s eliminado!",user));
-                    mg_http_serve_file( c, hm, "./public/index.html",&opts);
+                    mg_http_serve_file( c, hm, "/home/root/public/index.html",&opts);
                 }else{
                     LOG(LL_INFO,("Error al eliminar al usuario %s!",user));
 
@@ -302,16 +295,16 @@ void manejador_servidor( struct mg_connection *c, int ev, void *datos_ev, void *
             }
         }
         else if( mg_http_match_uri( hm, "/form_admin" ) ){
-            mg_http_serve_file( c, hm, "./public/data-admin.html",&opts);
+            mg_http_serve_file( c, hm, "/home/root/public/data-admin.html",&opts);
         }
         else if( mg_http_match_uri( hm, "/admin" ) ){
-            mg_http_serve_file( c, hm, "./public/admin.html",&opts);
+            mg_http_serve_file( c, hm, "/home/root/public/admin.html",&opts);
         }
         else if( mg_http_match_uri( hm, "/form" ) )
-            mg_http_serve_file( c, hm, "./public/form-user.html",&opts);
+            mg_http_serve_file( c, hm, "/home/root/public/form-user.html",&opts);
 
         else if( mg_http_match_uri( hm, "/alert" ) )
-            mg_http_serve_file( c, hm, "./public/indexAlert.html",&opts);
+            mg_http_serve_file( c, hm, "/home/root/public/indexAlert.html",&opts);
 
         else{
             struct mg_http_serve_opts opts2 = { .root_dir = dir_raiz };            

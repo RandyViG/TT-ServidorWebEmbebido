@@ -73,7 +73,7 @@ int obtener_usuario_por_indice(int index, struct datos_usuario *datos){ //usuari
     char c,buff[200];
     int usr_cont = -1,i=1,len=0,ld;
 
-    fp = fopen("usuarios.json","r");
+    fp = fopen("/home/root/.session/usuarios.json","r");
 
     if(fp == NULL){
         LOG(LL_INFO,("Hubo un error al abrir el archivo"));
@@ -126,7 +126,7 @@ int validar_usuario(char *usr, char *pwd){
     FILE *fp;
     char c,buff[200],buff_usr[100],buff_psw[100];
 
-    fp = fopen("usuarios.json","r");
+    fp = fopen("/home/root/.session/usuarios.json","r");
 
     if(fp == NULL){
         LOG(LL_INFO,("Hubo un error al abrir el archivo"));
@@ -179,7 +179,7 @@ long int buscar_coma(long int pt_ini){
     int i=0;
     char c;
     
-    fp = fopen("usuarios.json","r");
+    fp = fopen("/home/root/.session/usuarios.json","r");
     if(fp == NULL){
         printf("Hubo un error al abrir el archivo");
         return -1;
@@ -206,8 +206,8 @@ int eliminar_usuario(char *nombre){
     int i=0,len=0,n;
     long int puntero_inicio,puntero_fin;
 
-    fp_busqueda = fopen("usuarios.json","r");
-    fp_borrado = fopen("usuarios.json","r+");
+    fp_busqueda = fopen("/home/root/.session/usuarios.json","r");
+    fp_borrado = fopen("/home/root/.session/usuarios.json","r+");
 
     if(fp_busqueda == NULL){
         printf("Hubo un error al abrir el archivo");
@@ -286,7 +286,7 @@ int buscar_usuario_por_nombre(char *nombre, struct datos_usuario *usuario){
     int i=0,len=0,n;
     // long int puntero_inicio,puntero_fin;
 
-    fp = fopen("usuarios.json","r");
+    fp = fopen("/home/root/.session/usuarios.json","r");
 
     if(fp == NULL){
         printf("Hubo un error al abrir el archivo");
@@ -340,10 +340,7 @@ int agregar_usuario(char *nombre, char *psw, char *email, int nodo, int admin ){
     struct datos_usuario usuario;
     int i=0,flag=0,max_len=0,usr_exist;
 
-    fpr=fopen("usuarios.json","r+");
-
-    // max_len = str_len(nombre)+str_len(psw)+str_len(email)+71;
-    // printf("max: %d ",max_len);
+    fpr=fopen("/home/root/.session/usuarios.json","r+");
 
     usr_exist = buscar_usuario_por_nombre(nombre,&usuario);
     if(usr_exist > 0){printf("Usuario ya existente %d",usr_exist); return -1;}
