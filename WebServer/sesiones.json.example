@@ -5,32 +5,4 @@
 	"usuario":"zabdiel",
 	"creacion":"1637524710"
 	}
-	,                                                                                                      {
-	"id":"689966834",
-	"sha":"11268099402635130956",
-	"usuario":"admin",
-	"creacion":"1637525804"
-	}
-	,{
-	"id":"1500242544",
-	"sha":"3545792059934031130",
-	"usuario":"admin",
-	"creacion":"1637534818"
-	}
-	,{
-	"id":"101420822",
-	"sha":"16846522428346037770",
-	"usuario":"admin",
-	"creacion":"1638008273"
-	}
-<<<<<<< HEAD
-                                                                                                   ]
-=======
-	,{
-	"id":"443896047",
-	"sha":"18316121577511673742",
-	"usuario":"admin",
-	"creacion":"1638085432"
-	}
 ]
->>>>>>> 45f6d33 (Separando direcciones ip y archivos)
